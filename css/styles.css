@@ -1,0 +1,277 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.container-fluid {
+    padding: 2rem;
+}
+
+#example {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+    background-color: transparent;
+}
+
+#example thead th {
+    background-color: #f0f0f0;
+    color: #666;
+    font-weight: 600;
+    padding: 1rem;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border: none;
+}
+
+#example tbody tr {
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+#example tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#example tbody td {
+    padding: 1rem;
+    border: none;
+    vertical-align: middle;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+.bg-success {
+    background-color: #e6f7ed !important;
+    color: #0e8a44;
+}
+
+.bg-danger {
+    background-color: #fde8e8 !important;
+    color: #e12d39;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-info {
+    background-color: #e6f3ff;
+    color: #0066cc;
+    border: none;
+}
+
+.btn-danger {
+    background-color: #fde8e8;
+    color: #e12d39;
+    border: none;
+}
+
+.btn-primary {
+    background-color: #0066cc;
+    color: #ffffff;
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btnAdd {
+    text-align: right;
+    width: 83%;
+    margin-bottom: 20px;
+}
+
+#workReportTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+    background-color: transparent;
+}
+
+#workReportTable thead th {
+    background-color: #f0f0f0;
+    color: #666;
+    font-weight: 600;
+    padding: 1rem;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border: none;
+}
+
+#workReportTable tbody tr {
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+#workReportTable tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#workReportTable tbody td {
+    padding: 1rem;
+    border: none;
+    vertical-align: middle;
+}
+
+/* Adjust the modal size for better table display */
+#workReportModal .modal-dialog {
+    max-width: 80%;
+}
+
+/* Style for the Add Work Report and Download PDF buttons */
+#addWorkReportBtn, #downloadPdfBtn {
+    margin-right: 10px;
+}
+
+.dataTables_wrapper {
+    width: 100%;
+    margin: 0 auto;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #workReportModal, #workReportModal * {
+        visibility: visible;
+    }
+    #workReportModal {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    .modal-footer, .btn-close {
+        display: none;
+    }
+}
+
+/* Updated header styles */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.dashboard-subtitle {
+    font-size: 2rem;
+    color: #4a4a4a;
+    font-weight: 400;
+    position: relative;
+    display: inline-block;
+    padding: 0 1rem;
+}
+
+.dashboard-subtitle::before,
+.dashboard-subtitle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 30px;
+    height: 1px;
+    background-color: #4a4a4a;
+}
+
+.dashboard-subtitle::before {
+    left: -30px;
+}
+
+.dashboard-subtitle::after {
+    right: -30px;
+}
+
+.header-separator {
+    width: 50px;
+    height: 3px;
+    background-color: #0066cc;
+    margin: 0.75rem auto;
+}
+
+/* Add these styles to your existing CSS file */
+
+/* Modal styles */
+.modal-content {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    background-color: #f0f0f0;
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+.modal-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+/* Form styles */
+.form-label {
+    font-weight: 500;
+    color: #666;
+}
+
+.form-control {
+    border-radius: 0.25rem;
+    border: 1px solid #e0e0e0;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #0066cc;
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: #0066cc;
+    border-color: #0066cc;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #f0f0f0;
+    border-color: #f0f0f0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0;
+    border-color: #e0e0e0;
+    color: #333;
+}
