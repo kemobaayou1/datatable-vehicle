@@ -2,10 +2,9 @@
 include('connection.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $employeeNumber = $_POST['employeeNumber'];
     $uploadDir = 'uploads/';
     $fileExtension = pathinfo($_FILES['picture']['name'], PATHINFO_EXTENSION);
-    $fileName = $employeeNumber . '.' . $fileExtension;
+    $fileName = uniqid() . '.' . $fileExtension; // Use a unique identifier instead of employeeNumber
     $targetFile = $uploadDir . $fileName;
 
     if (move_uploaded_file($_FILES['picture']['tmp_name'], $targetFile)) {

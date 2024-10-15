@@ -4,15 +4,14 @@ include('connection.php');
 // Define columns to be used for ordering and searching
 $columns = array(
     0 => 'id',
-    1 => 'employeenumber',  // Add employee number column
-    2 => 'username',
-    3 => 'email',
-    4 => 'mobile',
-    5 => 'city',
-    6 => 'status',
-    7 => 'job',
-    8 => 'secjob',  // Add this line
-    9 => 'type_of_work'  // Add this line
+    1 => 'picture_path',
+    2 => 'carname',
+    3 => 'vin',
+    4 => 'plate_number',
+    5 => 'car_model',
+    6 => 'car_color',
+    7 => 'company_name',
+    8 => 'location'
 );
 
 // Initialize variables for server-side pagination
@@ -24,16 +23,18 @@ $orderColumn = isset($_POST['order'][0]['column']) ? $_POST['order'][0]['column'
 $orderDir = isset($_POST['order'][0]['dir']) ? $_POST['order'][0]['dir'] : 'asc';
 
 // Build base SQL query
-$sql = "SELECT * FROM users";
+$sql = "SELECT * FROM users WHERE 1=1";
 
 // Add search conditions
+$where = '';
 if (!empty($search)) {
-    $sql .= " WHERE ";
+    $where .= " AND (";
     $searchConditions = array();
     foreach ($columns as $key => $column) {
         $searchConditions[] = "$column LIKE '%$search%'";
     }
-    $sql .= implode(" OR ", $searchConditions);
+    $where .= implode(" OR ", $searchConditions);
+    $where .= ")";
 }
 
 // Add ordering conditions
@@ -54,34 +55,26 @@ $filteredRecords = mysqli_num_rows($filteredRecordsQuery);
 $sql .= " LIMIT $start, $length";
 
 // Fetch filtered data (using the SQL with pagination)
-$result = mysqli_query($con, $sql);
+$query = mysqli_query($con, $sql);
+$count_rows = mysqli_num_rows($query);
 
 // Prepare data for DataTable
 $data = array();
-while ($row = mysqli_fetch_assoc($result)) {
+while ($row = mysqli_fetch_assoc($query)) {
     $sub_array = array();
     $sub_array[] = $row['id'];
-    $sub_array[] = $row['employeenumber'];
-    
+     
     // Add picture column
     $picturePath = $row['picture_path'] ? $row['picture_path'] : 'path/to/default/image.jpg';
     $sub_array[] = $picturePath; // Just store the path, not the HTML
     
-    $sub_array[] = $row['username'];
-    $sub_array[] = $row['email'];
-    $sub_array[] = $row['mobile'];
-    $sub_array[] = $row['city'];
-    
-    // Create clickable status button 
-    if ($row['status'] === "active") {
-        $sub_array[] = '<span class="badge bg-success changeStatus" data-id="' . $row['id'] . '" data-status="active">نشط</span>';
-    } else {
-        $sub_array[] = '<span class="badge bg-danger changeStatus" data-id="' . $row['id'] . '" data-status="inactive">غير نشط</span>';
-    }
-
-    $sub_array[] = $row['job']; 
-    $sub_array[] = $row['secjob'];
-    $sub_array[] = $row['type_of_work'];
+    $sub_array[] = $row['carname'];
+    $sub_array[] = $row['vin'];
+    $sub_array[] = $row['plate_number'];
+    $sub_array[] = $row['car_model'];
+    $sub_array[] = $row['car_color'];
+    $sub_array[] = $row['company_name'];
+    $sub_array[] = $row['location'];
 
     // Add the Edit/Delete/Work Report buttons with Arabic text
     $sub_array[] = '<a href="javascript:void(0);" data-id="' . $row['id'] . '" class="btn btn-info btn-sm editbtn">تعديل</a> ' .

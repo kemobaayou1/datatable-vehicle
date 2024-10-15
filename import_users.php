@@ -54,18 +54,17 @@ if (isset($_FILES["fileToUpload"]) && $_FILES["fileToUpload"]["error"] == 0) {
 
                 $insertedRows = 0;
                 foreach ($records as $record) {
-                    $employeenumber = $record['employeenumber'];
-                    $username = $record['username'];
-                    $mobile = $record['mobile'];
-                    $email = $record['email'];
-                    $city = $record['city'];
-                    $job = $record['job'];
-                    $secjob = $record['secjob'];
-                    $type_of_work = $record['type_of_work'];
+                    $carname = $record['carname'];
+                    $vin = $record['vin'];
+                    $plate_number = $record['plate_number'];
+                    $car_model = $record['car_model'];
+                    $car_color = $record['car_color'];
+                    $company_name = $record['company_name'];
+                    $location = $record['location'];
 
-                    $sql = "INSERT INTO users (id, employeenumber, username, mobile, email, city, job, secjob, type_of_work) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $sql = "INSERT INTO users (id, carname, vin, plate_number, car_model, car_color, company_name, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $conn->prepare($sql);
-                    $stmt->bind_param("iisssssss", $startId, $employeenumber, $username, $mobile, $email, $city, $job, $secjob, $type_of_work);
+                    $stmt->bind_param("isssssss", $startId, $carname, $vin, $plate_number, $car_model, $car_color, $company_name, $location);
                     $stmt->execute();
 
                     if ($stmt->error) {

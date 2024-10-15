@@ -15,8 +15,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap CSS -->
+  <!-- Bootstrap CSS --> 
   <link href="css/bootstrap5.0.1.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="css/datatables-1.10.25.min.css" />
   <title>EABR AL-ALAM</title>
   <link rel="stylesheet" type="text/css" href="css/styles.css">
@@ -25,9 +26,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 <body>
   <div class="container-fluid">
     <div class="dashboard-header">
-        <h2 class="dashboard-title">WELCOME TO ABER-AL-ALAM DASHBOARD</h2>
+        <h2 class="dashboard-title">WELCOME TO KAHLIFA HOLDING CO</h2>
         <div class="header-separator"></div>
-        <p class="dashboard-subtitle">حصر عمالة عبر العالم</p>
+        <p class="dashboard-subtitle">حصر سيارات خليفة القابضة</p>
         
     </div>
     <div class="row">
@@ -45,16 +46,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             <table id="example" class="table">
               <thead>
                 <th>No.</th>
-                <th>الرقم الوظيفي </th>
-                <th>الصورة</th> <!-- New column for picture -->
-                <th>الاسم</th>
-                <th>ايميل</th>
-                <th>الهاتف</th>
-                <th>المدينة</th>
-                <th>الحالة</th>
-                <th>الوظيفة</th>
-                <th>الوظيفة الثانية</th>
-                <th>تصنيف العامل</th>
+                <th>الصورة</th>
+                <th>اسم السيارة</th>
+                <th>رقم الهيكل (VIN)</th>
+                <th>رقم اللوحة</th>
+                <th>موديل السيارة</th>
+                <th>لون السيارة</th>
+                <th>اسم الشركة</th>
+                <th>الموقع</th>
                 <th>Options</th>
               </thead>
               <tbody>
@@ -95,32 +94,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         "aoColumnDefs": [
           {
             "bSortable": false,
-            "aTargets": [2, 11] // Make picture and options columns unsortable
+            "aTargets": [1, 9]
           },
           {
             "render": function(data, type, row) {
               return '<img src="' + data + '" alt="Employee Picture" style="width: 50px; height: 50px; object-fit: cover;">';
             },
-            "targets": 2 // Apply to the picture column
-          },
-          {
-            "render": function(data, type, row) {
-              if (data === "active") {
-                return '<span class="badge bg-success changeStatus" data-id="' + row[0] + '" data-status="active">نشط</span>';
-              } else if (data === "inactive") {
-                return '<span class="badge bg-danger changeStatus" data-id="' + row[0] + '" data-status="inactive">غير نشط</span>';
-              }
-              return data;
-            },
-            "targets": 7 // Apply to the status column
+            "targets": 1
           },
           {
             "render": function(data, type, row) {
               return '<a href="javascript:void(0);" data-id="' + row[0] + '" class="btn btn-info btn-sm editbtn">تعديل</a> ' +
                      '<a href="#!" data-id="' + row[0] + '" class="btn btn-danger btn-sm deleteBtn">حذف</a> ' +
-                     '<a href="javascript:void(0);" data-employeenumber="' + row[1] + '" class="btn btn-primary btn-sm workReportBtn">تقرير عمل</a>';
+                     '<a href="javascript:void(0);" data-id="' + row[0] + '" class="btn btn-primary btn-sm workReportBtn">تقرير عمل</a>';
             },
-            "targets": 11 // Apply to the options column
+            "targets": 9
           }
         ],
         "pageLength": 10,
@@ -129,36 +117,34 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     });
     $(document).on('submit', '#addUser', function(e) {
       e.preventDefault();
-      var employeeNumber = $('#addEmployeeNumberField').val();
       var pictureFile = $('#addPictureField')[0].files[0];
-      var city = $('#addCityField').val();
-      var username = $('#addUserField').val();
-      var mobile = $('#addMobileField').val();
-      var email = $('#addEmailField').val();
-      var job = $('#addJobField').val();
-      var secjob = $('#addSecJobField').val();
-      var typeOfWork = $('#addTypeOfWorkField').val(); // New field
+      var car_model = $('#addCarModelField').val();
+      var carname = $('#addUserField').val();
+      var vin = $('#addVinField').val();
+      var plate_number = $('#addPlateNumberField').val();
+      var car_color = $('#addCarColorField').val();
+      var company_name = $('#addCompanyNameField').val();
+      var location = $('#addLocationField').val();
       
-      if (employeeNumber != '' && city != '' && username != '' && mobile != '' && email != '' && job != '' && secjob != '' && typeOfWork != '') {
-        uploadPicture(pictureFile, employeeNumber, function(err, picturePath) {
+      if (car_model != '' && carname != '' && vin != '' && plate_number != '' && car_color != '' && company_name != '' && location != '') {
+        uploadPicture(pictureFile, function(err, picturePath) {
           if (err) {
             alert('Error uploading picture: ' + err);
             return;
           }
-
+          
           $.ajax({
             url: "add_user.php",
             type: "post",
             data: {
-              employeeNumber: employeeNumber,
-              picturePath: picturePath,
-              city: city,
-              username: username,
-              mobile: mobile,
-              email: email,
-              job: job,
-              secjob: secjob,
-              typeOfWork: typeOfWork // Include new field
+              carname: carname,
+              vin: vin,
+              plate_number: plate_number,
+              car_model: car_model,
+              car_color: car_color,
+              company_name: company_name,
+              location: location,
+              picture_path: picturePath
             },
             success: function(data) {
               var json = JSON.parse(data);
@@ -182,100 +168,45 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     });
     $(document).on('submit', '#updateUser', function(e) {
       e.preventDefault();
-      var employeeNumber = $('#employeeNumberField').val();
-      var city = $('#cityField').val();
-      var username = $('#nameField').val();
-      var mobile = $('#mobileField').val();
-      var email = $('#emailField').val();
-      var job = $('#jobField').val();
-      var secjob = $('#secJobField').val();
-      var trid = $('#trid').val();
-      var id = $('#id').val();
+      var formData = new FormData(this);
+      formData.append('currentPicturePath', $('#currentPicturePath').val());
       
-      if (employeeNumber != '' && city != '' && username != '' && mobile != '' && email != '' && job != '' && secjob != '') {
-        var formData = new FormData(this);
-        formData.append('employeeNumber', employeeNumber);
-        formData.append('city', city);
-        formData.append('username', username);
-        formData.append('mobile', mobile);
-        formData.append('email', email);
-        formData.append('job', job);
-        formData.append('secjob', secjob);
-        formData.append('id', id);
-        
-        $.ajax({
-          url: "update_user.php",
-          type: "post",
-          data: formData,
-          processData: false,
-          contentType: false,
-          success: function(data) {
-            var json = JSON.parse(data);
-            var status = json.status;
-            if (status == 'true') {
-              table = $('#example').DataTable();
-              var button = '<a href="javascript:void(0);" data-id="' + id + '" class="btn btn-info btn-sm editbtn">Edit</a>  <a href="#!"  data-id="' + id + '"  class="btn btn-danger btn-sm deleteBtn">Delete</a>';
-              var row = table.row("[id='" + trid + "']");
-              var currentData = row.data();
-              currentData[1] = employeeNumber;
-              // Add a timestamp to force image reload
-              var timestamp = new Date().getTime();
-              currentData[2] = '<img src="' + json.picture_path + '?t=' + timestamp + '" alt="Employee Picture" style="width: 50px; height: 50px; object-fit: cover;">';
-              currentData[3] = username;
-              currentData[4] = email;
-              currentData[5] = mobile;
-              currentData[6] = city;
-              currentData[7] = json.status_value;
-              currentData[8] = job;
-              currentData[9] = secjob;
-              currentData[11] = button;
-              row.data(currentData).draw();
-              $('#exampleModal').modal('hide');
-            } else {
-              alert('Failed to update user: ' + (json.message || 'Unknown error'));
-            }
-          },
-          error: function(jqXHR, textStatus, errorThrown) {
-            console.error('AJAX error:', textStatus, errorThrown);
-            alert('Error updating user: ' + textStatus);
+      $.ajax({
+        url: "update_user.php",
+        type: "post",
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: 'json', // Expect JSON response
+        success: function(data) {
+          if (data.status == 'true') {
+            table = $('#example').DataTable();
+            var button = '<a href="javascript:void(0);" data-id="' + data.id + '" class="btn btn-info btn-sm editbtn">تعديل</a> ' +
+                         '<a href="#!" data-id="' + data.id + '" class="btn btn-danger btn-sm deleteBtn">حذف</a> ' +
+                         '<a href="javascript:void(0);" data-id="' + data.id + '" class="btn btn-primary btn-sm workReportBtn">تقرير عمل</a>';
+            var row = table.row("[id='" + $('#trid').val() + "']");
+            var currentData = row.data();
+            currentData[1] = data.picture_path; // Update picture path
+            currentData[2] = $('#nameField').val();
+            currentData[3] = $('#vinField').val();
+            currentData[4] = $('#plateNumberField').val();
+            currentData[5] = $('#carModelField').val();
+            currentData[6] = $('#carColorField').val();
+            currentData[7] = $('#companyNameField').val();
+            currentData[8] = data.location;
+            currentData[9] = button;
+            row.data(currentData).draw();
+            $('#exampleModal').modal('hide');
+          } else {
+            alert('Failed to update user: ' + (data.message || 'Unknown error'));
           }
-        });
-      } else {
-        alert('Please fill all the required fields');
-      }
-    });
-    $(document).on('click', '.changeStatus', function() {
-  var id = $(this).data('id');
-  var status = $(this).data('status'); 
-  var button = $(this);
-  var table = $('#example').DataTable();
-  var currentPage = table.page();
-
-  // Confirmation prompt
-  if (confirm("هل أنت متأكد أنك تريد تغيير حالة هذا المستخدم؟")) {
-    $.ajax({
-      url: 'update_user_status.php',
-      type: 'POST',
-      data: {
-        id: id,
-        status: status 
-      },
-      success: function(response) {
-        var data = JSON.parse(response);
-        if (data.status == "success") {
-          button.data('status', data.newStatus); 
-          button.text(data.newStatus); 
-          table.page(currentPage).draw(false);
-        } else {
-          alert('Error updating status!');
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.error('AJAX error:', textStatus, errorThrown);
+          alert('Error updating user: ' + textStatus);
         }
-      },
-      error: function() {
-        alert('Error updating status!');
-      }
+      });
     });
-  } 
-});
     $('#example').on('click', '.editbtn', function(event) {
       var table = $('#example').DataTable();
       var trid = $(this).closest('tr').attr('id');
@@ -291,13 +222,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         success: function(data) {
           var json = JSON.parse(data);
           console.log("Received data:", json); // Add this line for debugging
-          $('#employeeNumberField').val(json.employeenumber);
-          $('#nameField').val(json.username);
-          $('#emailField').val(json.email);
-          $('#mobileField').val(json.mobile);
-          $('#cityField').val(json.city);
-          $('#jobField').val(json.job);
-          $('#secJobField').val(json.secjob);
+          $('#nameField').val(json.carname);
+          $('#vinField').val(json.vin);
+          $('#plateNumberField').val(json.plate_number);
+          $('#carModelField').val(json.car_model);
+          $('#carColorField').val(json.car_color);
+          $('#companyNameField').val(json.company_name);
+          $('#locationField').val(json.location);
           $('#id').val(id);
           $('#trid').val(trid);
           
@@ -371,21 +302,19 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             return;
           }
 
-          var headers = ['Id', 'رقم الموظف', 'الاسم', 'ايميل', 'الهاتف', 'المدينة', 'الحالة', 'الوظيفة', 'الوظيفة الثانية', 'نوع العمل'];
+          var headers = ['Id', 'اسم السيارة', 'رقم الهيكل (VIN)', 'رقم اللوحة', 'موديل السيارة', 'لون السيارة', 'اسم الشركة', 'الموقع'];
           
           // Process the data to extract status text and remove the Options column
           var exportData = response.data.map(function(row) {
             return [
               row.id,
-              row.employeenumber,
-              row.username,
-              row.email,
-              row.mobile,
-              row.city,
-              row.status,
-              row.job,
-              row.secjob,
-              row.type_of_work
+              row.carname,
+              row.vin,
+              row.plate_number,
+              row.car_model,
+              row.car_color,
+              row.company_name,
+              row.location
             ];
           });
           
@@ -529,10 +458,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
       window.open('generate_work_report_pdf.php?employeeNumber=' + employeeNumber, '_blank');
     });
 
-    function uploadPicture(file, employeeNumber, callback) {
+    function uploadPicture(file, callback) {
+      if (!file) {
+        callback(null, ''); // No file selected, return empty path
+        return;
+      }
+
       var formData = new FormData();
       formData.append('picture', file);
-      formData.append('employeeNumber', employeeNumber);
 
       $.ajax({
         url: 'upload_picture.php',
@@ -541,15 +474,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         processData: false,
         contentType: false,
         success: function(response) {
-          var json = JSON.parse(response);
-          if (json.status === 'success') {
-            callback(null, json.picturePath);
-          } else {
-            callback(json.message || 'Failed to upload picture');
+          try {
+            var json = JSON.parse(response);
+            if (json.status === 'success') {
+              callback(null, json.picturePath);
+            } else {
+              callback(json.message || 'Failed to upload picture');
+            }
+          } catch (error) {
+            console.error('Error parsing JSON:', error);
+            callback('Error parsing server response');
           }
         },
-        error: function() {
-          callback('Error uploading picture');
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.error('AJAX error:', textStatus, errorThrown);
+          callback('Error uploading picture: ' + textStatus);
         }
       });
     }
@@ -568,45 +507,45 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             <input type="hidden" name="id" id="id" value="">
             <input type="hidden" name="trid" id="trid" value="">
             <div class="mb-3 row">
-              <label for="employeeNumberField" class="col-md-3 form-label">الرقم الوظيفي </label>
+              <label for="nameField" class="col-md-3 form-label">اسم السيارة</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="employeeNumberField" name="employeeNumber">
+                <input type="text" class="form-control" id="nameField" name="carname">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="nameField" class="col-md-3 form-label">الاسم</label>
+              <label for="vinField" class="col-md-3 form-label">رقم الهيكل (VIN)</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="nameField" name="name">
+                <input type="text" class="form-control" id="vinField" name="vin">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="emailField" class="col-md-3 form-label">ايميل</label>
+              <label for="plateNumberField" class="col-md-3 form-label">رقم اللوحة</label>
               <div class="col-md-9">
-                <input type="email" class="form-control" id="emailField" name="email">
+                <input type="text" class="form-control" id="plateNumberField" name="plate_number">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="mobileField" class="col-md-3 form-label">الهاتف</label>
+              <label for="carModelField" class="col-md-3 form-label">موديل السيارة</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="mobileField" name="mobile">
+                <input type="text" class="form-control" id="carModelField" name="car_model">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="cityField" class="col-md-3 form-label">المدينة</label>
+              <label for="carColorField" class="col-md-3 form-label">لون السيارة</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="cityField" name="City">
+                <input type="text" class="form-control" id="carColorField" name="car_color">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="jobField" class="col-md-3 form-label">الوظيفة</label>
+              <label for="companyNameField" class="col-md-3 form-label">اسم الشركة</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="jobField" name="job">
+                <input type="text" class="form-control" id="companyNameField" name="company_name">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="secJobField" class="col-md-3 form-label">الوظيفة الثانية</label>
+              <label for="locationField" class="col-md-3 form-label">الموقع</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="secJobField" name="secjob">
+                <input type="text" class="form-control" id="locationField" name="location">
               </div>
             </div>
             <div class="mb-3 row">
@@ -639,56 +578,45 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         <div class="modal-body">
           <form id="addUser" action="">
             <div class="mb-3 row">
-              <label for="addEmployeeNumberField" class="col-md-3 form-label">الرقم الوظيفي </label>
+              <label for="addUserField" class="col-md-3 form-label">اسم السيارة</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="addEmployeeNumberField" name="employeeNumber">
+                <input type="text" class="form-control" id="addUserField" name="carname">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="addUserField" class="col-md-3 form-label">الاسم</label>
+              <label for="addVinField" class="col-md-3 form-label">رقم الهيكل (VIN)</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="addUserField" name="name">
+                <input type="text" class="form-control" id="addVinField" name="vin">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="addEmailField" class="col-md-3 form-label">ايميل</label>
+              <label for="addPlateNumberField" class="col-md-3 form-label">رقم اللوحة</label>
               <div class="col-md-9">
-                <input type="email" class="form-control" id="addEmailField" name="email">
+                <input type="text" class="form-control" id="addPlateNumberField" name="plate_number">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="addMobileField" class="col-md-3 form-label">الهاتف</label>
+              <label for="addCarModelField" class="col-md-3 form-label">موديل السيارة</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="addMobileField" name="mobile">
+                <input type="text" class="form-control" id="addCarModelField" name="car_model">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="addCityField" class="col-md-3 form-label">المدينة</label>
+              <label for="addCarColorField" class="col-md-3 form-label">لون السيارة</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="addCityField" name="City">
+                <input type="text" class="form-control" id="addCarColorField" name="car_color">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="addJobField" class="col-md-3 form-label">الوظيفة</label>
+              <label for="addCompanyNameField" class="col-md-3 form-label">اسم الشركة</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="addJobField" name="job">
+                <input type="text" class="form-control" id="addCompanyNameField" name="company_name">
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="addSecJobField" class="col-md-3 form-label">الوظيفة الثانية</label>
+              <label for="addLocationField" class="col-md-3 form-label">الموقع</label>
               <div class="col-md-9">
-                <input type="text" class="form-control" id="addSecJobField" name="secjob">
-              </div>
-            </div>
-            <div class="mb-3 row">
-              <label for="addTypeOfWorkField" class="col-md-3 form-label">تصنيف العامل</label>
-              <div class="col-md-9">
-                <select class="form-select" id="addTypeOfWorkField" name="typeOfWork">
-                  <option value="فني درجة اولى">فني درجة اولى</option>
-                  <option value="فني">فني</option>
-                  <option value="عامل">عامل</option>
-                  <option value="فورمان">فورمان</option>
-                </select>
+                <input type="text" class="form-control" id="addLocationField" name="location">
               </div>
             </div>
             <div class="mb-3 row">

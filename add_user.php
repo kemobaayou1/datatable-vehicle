@@ -8,55 +8,38 @@ function getNextAvailableId($con) {
     return $row['max_id'] + 1;
 }
 
-$employeeNumber = $_POST['employeeNumber']; // Add employee number
-$picturePath = $_POST['picturePath']; 
-$username = $_POST['username'];
-$email = $_POST['email'];
-$mobile = $_POST['mobile'];
-$city = $_POST['city'];
-$job = $_POST['job']; // Add job
-$secjob = $_POST['secjob'];  // Add this line
-$typeOfWork = $_POST['typeOfWork']; // New field
-// Add this line to handle the picture path
-
-// Check if employee number already exists
-$checkSql = "SELECT * FROM users WHERE employeenumber = '$employeeNumber'";
-$checkResult = mysqli_query($con, $checkSql);
-
-if (mysqli_num_rows($checkResult) > 0) {
-    // Employee number already exists
-    $data = array(
-        'status' => 'false',
-        'message' => ' الرقم الوظيفي مستخدم من قبل موظف اخر'
-    );
-    echo json_encode($data);
-    exit;
-}
+$carname = $_POST['carname'];
+$vin = $_POST['vin'];
+$plate_number = $_POST['plate_number'];
+$car_model = $_POST['car_model'];
+$car_color = $_POST['car_color'];
+$company_name = $_POST['company_name'];
+$location = $_POST['location'];
+$picturePath = $_POST['picture_path'];
 
 // Get the next available ID
 $nextId = getNextAvailableId($con);
 
-$sql = "INSERT INTO `users` (`id`, `employeenumber`, `username`, `email`, `mobile`, `city`, `job`, `secjob`, `type_of_work`, `picture_path`) 
-        VALUES ($nextId, '$employeeNumber', '$username', '$email', '$mobile', '$city', '$job', '$secjob', '$typeOfWork', '$picturePath')";
+$sql = "INSERT INTO `users` (`carname`, `vin`, `plate_number`, `car_model`, `car_color`, `company_name`, `location`, `picture_path`) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-$query = mysqli_query($con, $sql);
+$stmt = $con->prepare($sql);
+$stmt->bind_param("ssssssss", $carname, $vin, $plate_number, $car_model, $car_color, $company_name, $location, $picturePath);
 
-$lastId = mysqli_insert_id($con); // Get the ID of the newly inserted row
-
-if($query === true) {
+if($stmt->execute()) {
     $data = array(
         'status' => 'true',
-        'lastId' => $lastId // Send the last ID back to the front-end
+        'id' => $con->insert_id
     );
-
     echo json_encode($data);
 } else {
     $data = array(
         'status' => 'false',
-        'message' => 'Error adding user'
+        'message' => 'Error: ' . $stmt->error
     );
-
     echo json_encode($data);
-} 
+}
 
+$stmt->close();
+$con->close();
 ?>
