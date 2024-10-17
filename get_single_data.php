@@ -4,7 +4,7 @@ include('connection.php');
 $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
 
 if ($id > 0) {
-    $sql = "SELECT *, picture_path FROM users WHERE id = ? LIMIT 1";
+    $sql = "SELECT * FROM users WHERE id = ? LIMIT 1";
     $stmt = $con->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();

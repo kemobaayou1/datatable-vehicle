@@ -1,17 +1,14 @@
 <?php
 include('connection.php');
 
-// Fetch all data from the users table, including type_of_work
-$sql = "SELECT id, employeenumber, username, email, mobile, city, status, job, secjob, type_of_work FROM users";
+// Fetch all data from the users table
+$sql = "SELECT id, carname, vin, plate_number, car_model, car_color, company_name, location FROM users";
 $result = mysqli_query($con, $sql);
 
 $data = array();
 while ($row = mysqli_fetch_assoc($result)) {
     $data[] = $row;
 }
-
-// Log the data
-error_log(print_r($data, true));
 
 // Output JSON response
 $output = array(

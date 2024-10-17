@@ -15,16 +15,16 @@ $car_model = $_POST['car_model'];
 $car_color = $_POST['car_color'];
 $company_name = $_POST['company_name'];
 $location = $_POST['location'];
-$picturePath = $_POST['picture_path'];
+$gps = $_POST['gps']; // Add this line
 
 // Get the next available ID
 $nextId = getNextAvailableId($con);
 
-$sql = "INSERT INTO `users` (`carname`, `vin`, `plate_number`, `car_model`, `car_color`, `company_name`, `location`, `picture_path`) 
+$sql = "INSERT INTO `users` (`carname`, `vin`, `plate_number`, `car_model`, `car_color`, `company_name`, `location`, `gps`) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $con->prepare($sql);
-$stmt->bind_param("ssssssss", $carname, $vin, $plate_number, $car_model, $car_color, $company_name, $location, $picturePath);
+$stmt->bind_param("ssssssss", $carname, $vin, $plate_number, $car_model, $car_color, $company_name, $location, $gps);
 
 if($stmt->execute()) {
     $data = array(

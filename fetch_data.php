@@ -4,14 +4,14 @@ include('connection.php');
 // Define columns to be used for ordering and searching
 $columns = array(
     0 => 'id',
-    1 => 'picture_path',
-    2 => 'carname',
-    3 => 'vin',
-    4 => 'plate_number',
-    5 => 'car_model',
-    6 => 'car_color',
-    7 => 'company_name',
-    8 => 'location'
+    1 => 'carname',
+    2 => 'vin',
+    3 => 'plate_number',
+    4 => 'car_model',
+    5 => 'car_color',
+    6 => 'company_name',
+    7 => 'location',
+    8 => 'gps'
 );
 
 // Initialize variables for server-side pagination
@@ -63,11 +63,6 @@ $data = array();
 while ($row = mysqli_fetch_assoc($query)) {
     $sub_array = array();
     $sub_array[] = $row['id'];
-     
-    // Add picture column
-    $picturePath = $row['picture_path'] ? $row['picture_path'] : 'path/to/default/image.jpg';
-    $sub_array[] = $picturePath; // Just store the path, not the HTML
-    
     $sub_array[] = $row['carname'];
     $sub_array[] = $row['vin'];
     $sub_array[] = $row['plate_number'];
@@ -75,6 +70,10 @@ while ($row = mysqli_fetch_assoc($query)) {
     $sub_array[] = $row['car_color'];
     $sub_array[] = $row['company_name'];
     $sub_array[] = $row['location'];
+    
+    // Add a class based on the GPS value
+    $gpsClass = $row['gps'] === 'يوجد' ? 'gps-available' : 'gps-unavailable';
+    $sub_array[] = '<span class="' . $gpsClass . '">' . $row['gps'] . '</span>';
 
     // Add the Edit/Delete/Work Report buttons with Arabic text
     $sub_array[] = '<a href="javascript:void(0);" data-id="' . $row['id'] . '" class="btn btn-info btn-sm editbtn">تعديل</a> ' .

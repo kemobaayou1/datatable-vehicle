@@ -21,6 +21,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
   <link rel="stylesheet" type="text/css" href="css/datatables-1.10.25.min.css" />
   <title>EABR AL-ALAM</title>
   <link rel="stylesheet" type="text/css" href="css/styles.css">
+  <!-- Add this to the <head> section -->
+  <style>
+    .gps-available {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+    .gps-unavailable {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+  </style>
 </head>
 
 <body>
@@ -35,7 +50,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
       <div class="container">
         <div class="btnAdd">
         <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
-          <a href="#!" data-id="" data-bs-toggle="modal" data-bs-target="#addUserModal" class="btn btn-success btn-sm">اضافة عامل</a>
+          <a href="#!" data-id="" data-bs-toggle="modal" data-bs-target="#addUserModal" class="btn btn-success btn-sm">اضافة سيارة جديدة</a>
           <button id="exportToExcel" class="btn btn-info btn-sm">حمل ملف اكسل </button>
           <!-- New button and form for file upload -->
           <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importUsersModal">csvاضافة عمال من ملف</button>
@@ -46,7 +61,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             <table id="example" class="table">
               <thead>
                 <th>No.</th>
-                <th>الصورة</th>
                 <th>اسم السيارة</th>
                 <th>رقم الهيكل (VIN)</th>
                 <th>رقم اللوحة</th>
@@ -54,6 +68,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                 <th>لون السيارة</th>
                 <th>اسم الشركة</th>
                 <th>الموقع</th>
+                <th>GPS</th>
                 <th>Options</th>
               </thead>
               <tbody>
@@ -94,13 +109,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         "aoColumnDefs": [
           {
             "bSortable": false,
-            "aTargets": [1, 9]
-          },
-          {
-            "render": function(data, type, row) {
-              return '<img src="' + data + '" alt="Employee Picture" style="width: 50px; height: 50px; object-fit: cover;">';
-            },
-            "targets": 1
+            "aTargets": [9]
           },
           {
             "render": function(data, type, row) {
@@ -109,6 +118,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                      '<a href="javascript:void(0);" data-id="' + row[0] + '" class="btn btn-primary btn-sm workReportBtn">تقرير عمل</a>';
             },
             "targets": 9
+          },
+          {
+            "targets": 8, // Assuming GPS is the 9th column (index 8)
+            "render": function(data, type, row) {
+                if (type === 'display') {
+                    return data; // The data already includes the span with the appropriate class
+                }
+                return data.replace(/<[^>]+>/g, ''); // Strip HTML for sorting/filtering
+            }
           }
         ],
         "pageLength": 10,
@@ -117,7 +135,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     });
     $(document).on('submit', '#addUser', function(e) {
       e.preventDefault();
-      var pictureFile = $('#addPictureField')[0].files[0];
       var car_model = $('#addCarModelField').val();
       var carname = $('#addUserField').val();
       var vin = $('#addVinField').val();
@@ -125,42 +142,36 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
       var car_color = $('#addCarColorField').val();
       var company_name = $('#addCompanyNameField').val();
       var location = $('#addLocationField').val();
+      var gps = $('#addGpsField').val();
       
-      if (car_model != '' && carname != '' && vin != '' && plate_number != '' && car_color != '' && company_name != '' && location != '') {
-        uploadPicture(pictureFile, function(err, picturePath) {
-          if (err) {
-            alert('Error uploading picture: ' + err);
-            return;
-          }
-          
-          $.ajax({
-            url: "add_user.php",
-            type: "post",
-            data: {
-              carname: carname,
-              vin: vin,
-              plate_number: plate_number,
-              car_model: car_model,
-              car_color: car_color,
-              company_name: company_name,
-              location: location,
-              picture_path: picturePath
-            },
-            success: function(data) {
-              var json = JSON.parse(data);
-              var status = json.status;
-              if (status == 'true') {
-                mytable = $('#example').DataTable();
-                mytable.draw();
-                $('#addUserModal').modal('hide');
-              } else {
-                alert(json.message || 'Failed to add user');
-              }
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-              alert('Error adding user: ' + textStatus);
+      if (car_model != '' && carname != '' && vin != '' && plate_number != '' && car_color != '' && company_name != '' && location != '' && gps != '') {
+        $.ajax({
+          url: "add_user.php",
+          type: "post",
+          data: {
+            carname: carname,
+            vin: vin,
+            plate_number: plate_number,
+            car_model: car_model,
+            car_color: car_color,
+            company_name: company_name,
+            location: location,
+            gps: gps
+          },
+          success: function(data) {
+            var json = JSON.parse(data);
+            var status = json.status;
+            if (status == 'true') {
+              mytable = $('#example').DataTable();
+              mytable.draw();
+              $('#addUserModal').modal('hide');
+            } else {
+              alert(json.message || 'Failed to add user');
             }
-          });
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            alert('Error adding user: ' + textStatus);
+          }
         });
       } else {
         alert('Fill all the required fields');
@@ -169,7 +180,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     $(document).on('submit', '#updateUser', function(e) {
       e.preventDefault();
       var formData = new FormData(this);
-      formData.append('currentPicturePath', $('#currentPicturePath').val());
       
       $.ajax({
         url: "update_user.php",
@@ -186,14 +196,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                          '<a href="javascript:void(0);" data-id="' + data.id + '" class="btn btn-primary btn-sm workReportBtn">تقرير عمل</a>';
             var row = table.row("[id='" + $('#trid').val() + "']");
             var currentData = row.data();
-            currentData[1] = data.picture_path; // Update picture path
-            currentData[2] = $('#nameField').val();
-            currentData[3] = $('#vinField').val();
-            currentData[4] = $('#plateNumberField').val();
-            currentData[5] = $('#carModelField').val();
-            currentData[6] = $('#carColorField').val();
-            currentData[7] = $('#companyNameField').val();
-            currentData[8] = data.location;
+            currentData[1] = $('#nameField').val();
+            currentData[2] = $('#vinField').val();
+            currentData[3] = $('#plateNumberField').val();
+            currentData[4] = $('#carModelField').val();
+            currentData[5] = $('#carColorField').val();
+            currentData[6] = $('#companyNameField').val();
+            currentData[7] = data.location;
+            currentData[8] = $('#gpsField').val();
             currentData[9] = button;
             row.data(currentData).draw();
             $('#exampleModal').modal('hide');
@@ -221,7 +231,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         type: 'post',
         success: function(data) {
           var json = JSON.parse(data);
-          console.log("Received data:", json); // Add this line for debugging
           $('#nameField').val(json.carname);
           $('#vinField').val(json.vin);
           $('#plateNumberField').val(json.plate_number);
@@ -229,20 +238,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
           $('#carColorField').val(json.car_color);
           $('#companyNameField').val(json.company_name);
           $('#locationField').val(json.location);
+          $('#gpsField').val(json.gps);
           $('#id').val(id);
           $('#trid').val(trid);
-          
-          // Clear the file input
-          $('#pictureField').val('');
-          
-          // Set the current picture and its path
-          if (json.picture_path) {
-            $('#currentPicture').attr('src', json.picture_path).show();
-            $('#currentPicturePath').val(json.picture_path);
-          } else {
-            $('#currentPicture').attr('src', '').hide();
-            $('#currentPicturePath').val('');
-          }
         },
         error: function(jqXHR, textStatus, errorThrown) {
           console.error("AJAX error:", textStatus, errorThrown);
@@ -282,8 +280,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     })
     
     $('#exportToExcel').on('click', function() {
-      var table = $('#example').DataTable();
-      
       // Show a loading indicator
       $('#exportToExcel').text('Loading...').prop('disabled', true);
       
@@ -293,8 +289,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         type: 'GET',
         dataType: 'json',
         success: function(response) {
-          console.log('Data received:', response);
-          
           if (!response.data || !Array.isArray(response.data)) {
             console.error('Invalid data received from server');
             alert('Error: Invalid data received from server');
@@ -302,9 +296,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             return;
           }
 
-          var headers = ['Id', 'اسم السيارة', 'رقم الهيكل (VIN)', 'رقم اللوحة', 'موديل السيارة', 'لون السيارة', 'اسم الشركة', 'الموقع'];
+          var headers = ['Id', 'اسم السيارة', 'رقم الهيكل (VIN)', 'رقم اللوحة', 'موديل السيارة', 'لون السيارة', 'اسم الشركة', 'الموقع', 'GPS'];
           
-          // Process the data to extract status text and remove the Options column
+          // Process the data
           var exportData = response.data.map(function(row) {
             return [
               row.id,
@@ -314,37 +308,17 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
               row.car_model,
               row.car_color,
               row.company_name,
-              row.location
+              row.location,
+              row.gps
             ];
           });
           
-          try {
-            var ws = XLSX.utils.aoa_to_sheet([headers, ...exportData]);
-            var wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Users");
-            
-            var wbout = XLSX.write(wb, {bookType:'xlsx', type:'binary'});
-            function s2ab(s) {
-              var buf = new ArrayBuffer(s.length);
-              var view = new Uint8Array(buf);
-              for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
-              return buf;
-            }
-            
-            var blob = new Blob([s2ab(wbout)], {type:"application/octet-stream"});
-            var url = URL.createObjectURL(blob);
-            
-            var a = document.createElement("a");
-            a.href = url;
-            a.download = "users_data.xlsx";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          } catch (error) {
-            console.error('Error generating Excel file:', error);
-            alert('Error generating Excel file. Please check the console for details.');
-          }
+          var ws = XLSX.utils.aoa_to_sheet([headers, ...exportData]);
+          var wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Users");
+          
+          // Generate Excel file
+          XLSX.writeFile(wb, "users_data.xlsx");
 
           $('#exportToExcel').text('Export to Excel').prop('disabled', false);
         },
@@ -458,41 +432,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
       window.open('generate_work_report_pdf.php?employeeNumber=' + employeeNumber, '_blank');
     });
 
-    function uploadPicture(file, callback) {
-      if (!file) {
-        callback(null, ''); // No file selected, return empty path
-        return;
-      }
-
-      var formData = new FormData();
-      formData.append('picture', file);
-
-      $.ajax({
-        url: 'upload_picture.php',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-          try {
-            var json = JSON.parse(response);
-            if (json.status === 'success') {
-              callback(null, json.picturePath);
-            } else {
-              callback(json.message || 'Failed to upload picture');
-            }
-          } catch (error) {
-            console.error('Error parsing JSON:', error);
-            callback('Error parsing server response');
-          }
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-          console.error('AJAX error:', textStatus, errorThrown);
-          callback('Error uploading picture: ' + textStatus);
-        }
-      });
-    }
-
   </script>
   <!-- Modal -->
   <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -549,11 +488,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="pictureField" class="col-md-3 form-label">صورة العامل</label>
+              <label for="gpsField" class="col-md-3 form-label">GPS</label>
               <div class="col-md-9">
-                <input type="file" class="form-control" id="pictureField" name="picture" accept="image/*">
-                <img id="currentPicture" src="" alt="Current Picture" style="max-width: 100px; max-height: 100px; margin-top: 10px;">
-                <input type="hidden" id="currentPicturePath" name="currentPicturePath">
+                <select class="form-control" id="gpsField" name="gps">
+                  <option value="يوجد">يوجد</option>
+                  <option value="لا يوجد">لا يوجد</option>
+                </select>
               </div>
             </div>
             <div class="text-center">
@@ -620,9 +560,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="addPictureField" class="col-md-3 form-label">صورة العامل</label>
+              <label for="addGpsField" class="col-md-3 form-label">GPS</label>
               <div class="col-md-9">
-                <input type="file" class="form-control" id="addPictureField" name="picture" accept="image/*">
+                <select class="form-control" id="addGpsField" name="gps">
+                  <option value="يوجد">يوجد</option>
+                  <option value="لا يوجد">لا يوجد</option>
+                </select>
               </div>
             </div>
             <div class="text-center">
