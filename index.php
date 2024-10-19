@@ -36,6 +36,26 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         border-radius: 4px;
     }
   </style>
+  
+  <!-- Add Font Awesome CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Add custom styles for the icons -->
+  <style>
+    /* ... existing styles ... */
+    
+    .action-icon {
+      cursor: pointer;
+      margin: 0 5px;
+      font-size: 1.2em;
+    }
+    .edit-icon {
+      color: #17a2b8;
+    }
+    .delete-icon {
+      color: #dc3545;
+    }
+  </style>
 </head>
 
 <body>
@@ -74,6 +94,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
               <tbody>
               </tbody>
             </table>
+            <div id="totalCount" style="text-align: center; font-size: 1.25rem; font-weight: bold; color: #333; margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);"></div>
           </div>
           <div class="col-md-2"></div>
         </div>
@@ -94,7 +115,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
   -->
   <script type="text/javascript">
     $(document).ready(function() {
-      $('#example').DataTable({
+      var table = $('#example').DataTable({
         "fnCreatedRow": function(nRow, aData, iDataIndex) {
           $(nRow).attr('id', aData[0]);
         },
@@ -106,31 +127,60 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
           'url': 'fetch_data.php',
           'type': 'post',
         },
-        "aoColumnDefs": [
+        "columnDefs": [
           {
             "bSortable": false,
-            "aTargets": [9]
+            "aTargets": [9] // Disable sorting for the Options column
           },
           {
             "render": function(data, type, row) {
-              return '<a href="javascript:void(0);" data-id="' + row[0] + '" class="btn btn-info btn-sm editbtn">تعديل</a> ' +
-                     '<a href="#!" data-id="' + row[0] + '" class="btn btn-danger btn-sm deleteBtn">حذف</a> ' +
-                     '<a href="javascript:void(0);" data-id="' + row[0] + '" class="btn btn-primary btn-sm workReportBtn">تقرير عمل</a>';
+              return '<i class="fas fa-edit action-icon edit-icon" data-id="' + row[0] + '"></i>' +
+                     '<i class="fas fa-trash-alt action-icon delete-icon" data-id="' + row[0] + '"></i>';
             },
-            "targets": 9
+            "targets": 9 // Options column
           },
           {
-            "targets": 8, // Assuming GPS is the 9th column (index 8)
+            "targets": 8, // GPS column
             "render": function(data, type, row) {
                 if (type === 'display') {
                     return data; // The data already includes the span with the appropriate class
                 }
                 return data.replace(/<[^>]+>/g, ''); // Strip HTML for sorting/filtering
             }
+          },
+          {
+            "targets": [8, 9], // Disable filtering for GPS and Options columns
+            "searchable": false // Disable searching for these columns
           }
         ],
         "pageLength": 10,
-        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        initComplete: function () {
+            this.api().columns().every(function () {
+                var column = this;
+                if (column.index() !== 8 && column.index() !== 9) { // Exclude GPS and Options columns
+                    var select = $('<select><option value="">All</option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+                            column
+                                .search(val ? val : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="'+d+'">'+d+'</option>')
+                    });
+                }
+            });
+        },
+        "fnDrawCallback": function() {
+          var filteredCount = this.api().rows({ filter: 'applied' }).count();
+          var totalCount = this.api().data().count();
+          $('#totalCount').html('المجموع المحدد:' + filteredCount );
+        }
       });
     });
     $(document).on('submit', '#addUser', function(e) {
@@ -192,8 +242,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
           if (data.status == 'true') {
             table = $('#example').DataTable();
             var button = '<a href="javascript:void(0);" data-id="' + data.id + '" class="btn btn-info btn-sm editbtn">تعديل</a> ' +
-                         '<a href="#!" data-id="' + data.id + '" class="btn btn-danger btn-sm deleteBtn">حذف</a> ' +
-                         '<a href="javascript:void(0);" data-id="' + data.id + '" class="btn btn-primary btn-sm workReportBtn">تقرير عمل</a>';
+                         '<a href="#!" data-id="' + data.id + '" class="btn btn-danger btn-sm deleteBtn">حذف</a> ';
             var row = table.row("[id='" + $('#trid').val() + "']");
             var currentData = row.data();
             currentData[1] = $('#nameField').val();
@@ -217,7 +266,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         }
       });
     });
-    $('#example').on('click', '.editbtn', function(event) {
+    $('#example').on('click', '.edit-icon', function(event) {
       var table = $('#example').DataTable();
       var trid = $(this).closest('tr').attr('id');
       var id = $(this).data('id');
@@ -249,7 +298,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
       });
     });
 
-    $(document).on('click', '.deleteBtn', function(event) {
+    $(document).on('click', '.delete-icon', function(event) {
       var table = $('#example').DataTable();
       event.preventDefault();
       var id = $(this).data('id');
@@ -280,157 +329,96 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     })
     
     $('#exportToExcel').on('click', function() {
-      // Show a loading indicator
-      $('#exportToExcel').text('Loading...').prop('disabled', true);
-      
-      // Request all data from the server
-      $.ajax({
-        url: 'fetch_all_data.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-          if (!response.data || !Array.isArray(response.data)) {
-            console.error('Invalid data received from server');
-            alert('Error: Invalid data received from server');
-            $('#exportToExcel').text('Export to Excel').prop('disabled', false);
-            return;
-          }
-
-          var headers = ['Id', 'اسم السيارة', 'رقم الهيكل (VIN)', 'رقم اللوحة', 'موديل السيارة', 'لون السيارة', 'اسم الشركة', 'الموقع', 'GPS'];
-          
-          // Process the data
-          var exportData = response.data.map(function(row) {
-            return [
-              row.id,
-              row.carname,
-              row.vin,
-              row.plate_number,
-              row.car_model,
-              row.car_color,
-              row.company_name,
-              row.location,
-              row.gps
-            ];
-          });
-          
-          var ws = XLSX.utils.aoa_to_sheet([headers, ...exportData]);
-          var wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, "Users");
-          
-          // Generate Excel file
-          XLSX.writeFile(wb, "users_data.xlsx");
-
-          $('#exportToExcel').text('Export to Excel').prop('disabled', false);
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-          console.error('AJAX error:', textStatus, errorThrown);
-          alert('Error fetching data from server. Please check the console for details.');
-          $('#exportToExcel').text('Export to Excel').prop('disabled', false);
-        }
-      });
-    });
-
-    // Add this new event listener for the Work Report button
-    $(document).on('click', '.workReportBtn', function() {
-      var employeeNumber = $(this).data('employeenumber');
-      console.log('Work Report button clicked. Employee number:', employeeNumber);
-      if (!employeeNumber || employeeNumber === 'undefined') {
-        console.error('Invalid employee number:', employeeNumber);
-        alert('Error: Invalid employee number');
-        return;
-      }
-      $('#workReportModal').modal('show');
-      $('#workReportEmployeeNumber').val(employeeNumber);
-      loadWorkReports(employeeNumber);
-    });
-
-    function loadWorkReports(employeeNumber) {
-      console.log('Loading work reports for employee number:', employeeNumber);
-      if ($.fn.DataTable.isDataTable('#workReportTable')) {
-        $('#workReportTable').DataTable().destroy();
-      }
-      $('#workReportTable').DataTable({
-        "processing": true,
-        "serverSide": false,
-        "ajax": {
-          "url": "fetch_work_reports.php",
-          "type": "POST",
-          "data": function(d) {
-            d.employeeNumber = employeeNumber;
-            console.log('Sending data to server:', d);
-            return d;
-          },
-          "dataSrc": function(json) {
-            console.log("Received data from server:", json);
-            if (json.error) {
-              console.error("Server returned an error:", json.error);
-              alert('Error: ' + json.error);
-              return [];
+        // Show a loading indicator
+        $('#exportToExcel').text('Loading...').prop('disabled', true);
+        
+        // Get the DataTable instance
+        var table = $('#example').DataTable();
+        
+        // Check if there are any filters applied
+        var filteredData = table.rows({ filter: 'applied' }).data();
+        
+        // Prepare the data to send to the server
+        var exportData = [];
+        if (filteredData.length > 0) {
+            // If there are filtered rows, prepare them for export
+            for (var i = 0; i < filteredData.length; i++) {
+                // Exclude the last column (edit/delete buttons)
+                exportData.push([
+                    filteredData[i][0], // ID
+                    filteredData[i][1], // Car Name
+                    filteredData[i][2], // VIN
+                    filteredData[i][3], // Plate Number
+                    filteredData[i][4], // Car Model
+                    filteredData[i][5], // Car Color
+                    filteredData[i][6], // Company Name
+                    filteredData[i][7], // Location
+                    filteredData[i][8]  // GPS (will clean this up below)
+                ]);
             }
-            return json.data || [];
-          },
-          "error": function(xhr, error, thrown) {
-            console.error('DataTables AJAX error:', error, thrown);
-            alert('Error loading work reports. Please check the console for details.');
-          }
-        },
-        "columns": [
-          { "data": 0, "title": "Date" },
-          { "data": 1, "title": "Location" },
-          { "data": 2, "title": "Description" },
-          { "data": 3, "title": "Percentage Done" }
-        ],
-        "order": [[0, "desc"]],
-        "pageLength": 10,
-        "lengthChange": false,
-        "searching": false,
-        "info": false,
-        "language": {
-          "emptyTable": "No work reports available"
+        } else {
+            // If no rows are filtered, fetch all data
+            $.ajax({
+                url: 'fetch_all_data.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.data && Array.isArray(response.data)) {
+                        // Prepare the data for export
+                        response.data.forEach(function(row) {
+                            exportData.push([
+                                row.id,
+                                row.carname,
+                                row.vin,
+                                row.plate_number,
+                                row.car_model,
+                                row.car_color,
+                                row.company_name,
+                                row.location,
+                                row.gps // Clean this up below
+                            ]);
+                        });
+                    }
+                    // Call the function to export the data
+                    exportToExcel(exportData);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching all data:', error);
+                    alert('Error fetching data for export.');
+                }
+            });
+            return; // Exit the function to prevent further execution
         }
-      });
+        
+        // Clean up GPS data to remove HTML tags
+        exportData = exportData.map(function(row) {
+            row[8] = row[8].replace(/<[^>]+>/g, ''); // Remove HTML tags from GPS
+            return row;
+        });
+
+        // Call the function to export the data
+        exportToExcel(exportData);
+    });
+
+    // Function to handle exporting to Excel
+    function exportToExcel(data) {
+        // Define headers for the Excel file
+        var headers = ['ID', 'اسم السيارة', 'رقم الهيكل (VIN)', 'رقم اللوحة', 'موديل السيارة', 'لون السيارة', 'اسم الشركة', 'الموقع', 'GPS'];
+        
+        // Convert the data to a format suitable for Excel
+        var worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+        var workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+        
+        // Generate a file name
+        var fileName = 'exported_data.xlsx';
+        
+        // Save the file
+        XLSX.writeFile(workbook, fileName);
+        
+        // Reset the button text and state
+        $('#exportToExcel').text('Export to Excel').prop('disabled', false);
     }
-
-    // Handle Add Work Report button click
-    $(document).on('click', '#addWorkReportBtn', function() {
-      var employeeNumber = $('#workReportEmployeeNumber').val();
-      $('#addWorkReportModal').modal('show');
-      console.log('Add Work Report button clicked. Employee number:', employeeNumber);
-    });
-
-    // Add Work Report Form Submission
-    $(document).on('submit', '#addWorkReportForm', function(e) {
-      e.preventDefault();
-      var formData = $(this).serialize();
-      console.log('Form data being sent:', formData);
-      $.ajax({
-        url: 'add_work_report.php',
-        type: 'POST',
-        data: formData,
-        dataType: 'json',
-        success: function(response) {
-          console.log('Server response:', response);
-          if (response.status === 'true') {
-            alert('تم اضافة التقرير بنجاح');
-            $('#addWorkReportModal').modal('hide');
-            var employeeNumber = $('#workReportEmployeeNumber').val();
-            loadWorkReports(employeeNumber);
-          } else {
-            alert('Failed to add work report: ' + (response.error || 'Unknown error'));
-          }
-        },
-        error: function(xhr, status, error) {
-          console.error('AJAX error:', xhr.responseText);
-          alert('Error submitting work report: ' + error);
-        }
-      });
-    });
-
-    // Add this event listener for the PDF download button
-    $(document).on('click', '#downloadPdfBtn', function() {
-      var employeeNumber = $('#workReportEmployeeNumber').val();
-      window.open('generate_work_report_pdf.php?employeeNumber=' + employeeNumber, '_blank');
-    });
 
   </script>
   <!-- Modal -->
@@ -598,71 +586,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Work Report Modal -->
-  <div class="modal fade" id="workReportModal" tabindex="-1" aria-labelledby="workReportModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="workReportModalLabel">تقرير عمل</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <button id="addWorkReportBtn" class="btn btn-primary mb-3">اضف تقرير عمل</button>
-          <button id="downloadPdfBtn" class="btn btn-success mb-3 ms-2">تحميل ملف PDF</button>
-          <table id="workReportTable" class="table table-striped w-100">
-            <thead>
-              <tr>
-                <th>التاريخ</th>
-                <th>الموقع</th>
-                <th>الوصف</th>
-                <th>النسبة المكتملة</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add Work Report Modal -->
-  <div class="modal fade" id="addWorkReportModal" tabindex="-1" aria-labelledby="addWorkReportModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addWorkReportModalLabel">اضف تقرير عمل</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="addWorkReportForm">
-            <input type="hidden" id="workReportEmployeeNumber" name="employeeNumber">
-            <div class="mb-3">
-              <label for="date" class="form-label">التاريخ</label>
-              <input type="date" class="form-control" id="date" name="date" required>
-            </div>
-            <div class="mb-3">
-              <label for="location" class="form-label">الموقع</label>
-              <input type="text" class="form-control" id="location" name="location" required>
-            </div>
-            <div class="mb-3">
-              <label for="description" class="form-label">الوصف</label>
-              <textarea class="form-control" id="description" name="description" required></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="percentage_done" class="form-label">النسبة المكتملة</label>
-              <input type="number" class="form-control" id="percentage_done" name="percentage_done" min="0" max="100" required>
-            </div>
-            <button type="submit" class="btn btn-primary">اضف</button>
-          </form>
         </div>
       </div>
     </div>

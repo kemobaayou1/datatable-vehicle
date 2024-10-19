@@ -275,3 +275,10 @@ body {
     border-color: #e0e0e0;
     color: #333;
 }
+
+thead select {
+    width: 100%;
+    padding: 3px;
+    box-sizing: border-box;
+    margin-top: 3px;
+}
