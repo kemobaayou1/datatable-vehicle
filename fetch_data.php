@@ -73,8 +73,9 @@ while ($row = mysqli_fetch_assoc($query)) {
         }
         $sub_array[] = $value;
     }
-    $sub_array[] = '<a href="javascript:void(0);" data-id="' . $row['id'] . '" class="btn btn-info btn-sm editbtn">تعديل</a> ' .
-                   '<a href="#!" data-id="' . $row['id'] . '" class="btn btn-danger btn-sm deleteBtn">حذف</a>';
+    // Update this line to use Font Awesome icons instead of buttons
+    $sub_array[] = '<i class="fas fa-edit action-icon edit-icon" data-id="' . $row['id'] . '"></i>' .
+                   '<i class="fas fa-trash-alt action-icon delete-icon" data-id="' . $row['id'] . '"></i>';
     $data[] = $sub_array;
 }
 

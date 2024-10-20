@@ -35,6 +35,64 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         padding: 5px 10px;
         border-radius: 4px;
     }
+    /* Add these styles for the new layout */
+    body {
+        display: flex;
+        min-height: 100vh;
+        margin: 0;
+    }
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 250px;
+        height: 100vh;
+        background-color: #f8f9fa;
+        padding: 20px;
+        transition: width 0.3s;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+    .sidebar.collapsed {
+        width: 80px;
+    }
+    .content {
+        flex: 1;
+        margin-left: 250px; /* Same as sidebar width */
+        transition: margin-left 0.3s;
+        padding: 20px;
+        overflow-y: auto;
+    }
+    .content.sidebar-collapsed {
+        margin-left: 80px; /* Same as collapsed sidebar width */
+    }
+    .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        color: #333;
+        text-decoration: none;
+    }
+    .nav-link i {
+        margin-right: 10px;
+    }
+    .nav-link span {
+        display: inline-block;
+    }
+    .sidebar.collapsed .nav-link span {
+        display: none;
+    }
+    .logout-btn {
+        margin-top: auto;
+        padding: 10px;
+        color: #dc3545;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        display: flex;
+        align-items: center;
+    }
   </style>
   
   <!-- Add Font Awesome CSS -->
@@ -59,46 +117,76 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 </head>
 
 <body>
-  <div class="container-fluid">
-    <div class="dashboard-header">
-        <h2 class="dashboard-title">WELCOME TO KAHLIFA HOLDING CO</h2>
-        <div class="header-separator"></div>
-        <p class="dashboard-subtitle">حصر سيارات خليفة القابضة</p>
-        
+  <div class="sidebar" id="sidebar">
+    <div class="logo">
+        <!-- Add your logo here -->
+        <img src="Logo/khglogo.png" alt="Logo" style="max-width: 100%; height: auto;">
     </div>
-    <div class="row">
-      <div class="container">
-        <div class="btnAdd">
-        <a href="logout.php" class="btn btn-danger btn-sm">Logout</a>
-          <a href="#!" data-id="" data-bs-toggle="modal" data-bs-target="#addUserModal" class="btn btn-success btn-sm">اضافة سيارة جديدة</a>
-          <button id="exportToExcel" class="btn btn-info btn-sm">حمل ملف اكسل </button>
-          <!-- New button and form for file upload -->
-          <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importUsersModal">csvاضافة عمال من ملف</button>
+    <nav>
+        <a href="#" class="nav-link active" data-tab="dashboard">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-link" data-tab="history">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+        </a>
+    </nav>
+    <a href="#" class="nav-link logout-btn" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+    </a>
+  </div>
+  <div class="content" id="content">
+    <div id="dashboard-tab" class="tab-content active">
+        <!-- Your existing dashboard content goes here -->
+        <div class="container-fluid">
+            <div class="dashboard-header">
+                <h2 class="dashboard-title">WELCOME TO KAHLIFA HOLDING CO</h2>
+                <div class="header-separator"></div>
+                <p class="dashboard-subtitle">حصر سيارات خليفة القابضة</p>
+            </div>
+            <div class="row">
+              <div class="container">
+                <div class="btnAdd">
+                <!-- Remove this line -->
+                <!-- <a href="logout.php" class="btn btn-danger btn-sm">Logout</a> -->
+                  <a href="#!" data-id="" data-bs-toggle="modal" data-bs-target="#addUserModal" class="btn btn-success btn-sm">اضافة سيارة جديدة</a>
+                  <button id="exportToExcel" class="btn btn-info btn-sm">حمل ملف اكسل </button>
+                  <!-- New button and form for file upload -->
+                  <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importUsersModal">csvاضافة عمال من ملف</button>
+                </div>
+                <div class="row">
+                  <div class="col-md-2"></div>
+                  <div class="col-md-8">
+                    <table id="example" class="table">
+                      <thead>
+                        <th>No.</th>
+                        <th>اسم السيارة</th>
+                        <th>رقم الهيكل (VIN)</th>
+                        <th>رقم اللوحة</th>
+                        <th>موديل السيارة</th>
+                        <th>لون السيارة</th>
+                        <th>اسم الشركة</th>
+                        <th>الموقع</th>
+                        <th>GPS</th>
+                        <th>Options</th>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                    </table>
+                    <div id="totalCount" style="text-align: center; font-size: 1.25rem; font-weight: bold; color: #333; margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);"></div>
+                  </div>
+                  <div class="col-md-2"></div>
+                </div>
+              </div>
+            </div>
         </div>
-        <div class="row">
-          <div class="col-md-2"></div>
-          <div class="col-md-8">
-            <table id="example" class="table">
-              <thead>
-                <th>No.</th>
-                <th>اسم السيارة</th>
-                <th>رقم الهيكل (VIN)</th>
-                <th>رقم اللوحة</th>
-                <th>موديل السيارة</th>
-                <th>لون السيارة</th>
-                <th>اسم الشركة</th>
-                <th>الموقع</th>
-                <th>GPS</th>
-                <th>Options</th>
-              </thead>
-              <tbody>
-              </tbody>
-            </table>
-            <div id="totalCount" style="text-align: center; font-size: 1.25rem; font-weight: bold; color: #333; margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);"></div>
-          </div>
-          <div class="col-md-2"></div>
-        </div>
-      </div>
+    </div>
+    <div id="history-tab" class="tab-content" style="display: none;">
+        <!-- Add your history content here -->
+        <h2>History</h2>
+        <p>This is the history tab. Add your content here.</p>
     </div>
   </div>
   <!-- Optional JavaScript; choose one of the two! -->
@@ -176,10 +264,38 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                 }
             });
         },
-        "fnDrawCallback": function() {
-          var filteredCount = this.api().rows({ filter: 'applied' }).count();
-          var totalCount = this.api().data().count();
-          $('#totalCount').html('المجموع المحدد:' + filteredCount );
+        "fnDrawCallback": function(oSettings) {
+          var api = this.api();
+          var filteredCount = api.page.info().recordsDisplay;
+          var totalCount = api.page.info().recordsTotal;
+          $('#totalCount').html('المجموع المحدد: ' + filteredCount + ' / إجمالي السجلات: ' + totalCount);
+        }
+      });
+      // Add this new code for sidebar functionality
+      $('.nav-link').on('click', function(e) {
+        e.preventDefault();
+        $('.nav-link').removeClass('active');
+        $(this).addClass('active');
+        
+        var tabId = $(this).data('tab');
+        $('.tab-content').hide();
+        $('#' + tabId + '-tab').show();
+      });
+
+      // Add this for sidebar collapse functionality
+      $('#sidebar').on('mouseenter', function() {
+        $(this).removeClass('collapsed');
+        $('#content').removeClass('sidebar-collapsed');
+      }).on('mouseleave', function() {
+        $(this).addClass('collapsed');
+        $('#content').addClass('sidebar-collapsed');
+      });
+
+      // Add this new code for logout functionality
+      $('#logoutBtn').on('click', function(e) {
+        e.preventDefault();
+        {
+          window.location.href = 'logout.php';
         }
       });
     });
@@ -329,6 +445,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     })
     
     $('#exportToExcel').on('click', function() {
+        console.log('Export button clicked');
         // Show a loading indicator
         $('#exportToExcel').text('Loading...').prop('disabled', true);
         
@@ -336,72 +453,65 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         var table = $('#example').DataTable();
         
         // Check if there are any filters applied
-        var filteredData = table.rows({ filter: 'applied' }).data();
+        var isFiltered = table.search() !== '' || table.columns().search().any();
+        console.log('Is filtered:', isFiltered);
         
-        // Prepare the data to send to the server
-        var exportData = [];
-        if (filteredData.length > 0) {
+        if (isFiltered) {
+            console.log('Exporting filtered data');
             // If there are filtered rows, prepare them for export
-            for (var i = 0; i < filteredData.length; i++) {
-                // Exclude the last column (edit/delete buttons)
-                exportData.push([
-                    filteredData[i][0], // ID
-                    filteredData[i][1], // Car Name
-                    filteredData[i][2], // VIN
-                    filteredData[i][3], // Plate Number
-                    filteredData[i][4], // Car Model
-                    filteredData[i][5], // Car Color
-                    filteredData[i][6], // Company Name
-                    filteredData[i][7], // Location
-                    filteredData[i][8]  // GPS (will clean this up below)
-                ]);
-            }
+            var filteredData = table.rows({ filter: 'applied' }).data().toArray();
+            console.log('Filtered data length:', filteredData.length);
+            prepareAndExportData(filteredData);
         } else {
+            console.log('Fetching all data');
             // If no rows are filtered, fetch all data
             $.ajax({
                 url: 'fetch_all_data.php',
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
+                    console.log('Data fetched successfully');
                     if (response.data && Array.isArray(response.data)) {
-                        // Prepare the data for export
-                        response.data.forEach(function(row) {
-                            exportData.push([
-                                row.id,
-                                row.carname,
-                                row.vin,
-                                row.plate_number,
-                                row.car_model,
-                                row.car_color,
-                                row.company_name,
-                                row.location,
-                                row.gps // Clean this up below
-                            ]);
-                        });
+                        console.log('Data is valid. Length:', response.data.length);
+                        prepareAndExportData(response.data);
+                    } else {
+                        console.error('Invalid data format received', response);
+                        alert('Error preparing data for export.');
                     }
-                    // Call the function to export the data
-                    exportToExcel(exportData);
                 },
                 error: function(xhr, status, error) {
                     console.error('Error fetching all data:', error);
                     alert('Error fetching data for export.');
+                },
+                complete: function() {
+                    // Reset the button text and state
+                    $('#exportToExcel').text('Export to Excel').prop('disabled', false);
                 }
             });
-            return; // Exit the function to prevent further execution
         }
-        
-        // Clean up GPS data to remove HTML tags
-        exportData = exportData.map(function(row) {
-            row[8] = row[8].replace(/<[^>]+>/g, ''); // Remove HTML tags from GPS
-            return row;
-        });
-
-        // Call the function to export the data
-        exportToExcel(exportData);
     });
 
-    // Function to handle exporting to Excel
+    function prepareAndExportData(rawData) {
+        console.log('Preparing data for export. Raw data length:', rawData.length);
+        var exportData = rawData.map(function(row) {
+            return [
+                row.id || row[0],
+                row.carname || row[1],
+                row.vin || row[2],
+                row.plate_number || row[3],
+                row.car_model || row[4],
+                row.car_color || row[5],
+                row.company_name || row[6],
+                row.location || row[7],
+                (row.gps || row[8] || '').replace(/<[^>]+>/g, '') // Clean up GPS data
+            ];
+        });
+        console.log('Export data prepared. Length:', exportData.length);
+        exportToExcel(exportData);
+    }
+
     function exportToExcel(data) {
+        console.log('Exporting to Excel. Data length:', data.length);
         // Define headers for the Excel file
         var headers = ['ID', 'اسم السيارة', 'رقم الهيكل (VIN)', 'رقم اللوحة', 'موديل السيارة', 'لون السيارة', 'اسم الشركة', 'الموقع', 'GPS'];
         
@@ -415,6 +525,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         
         // Save the file
         XLSX.writeFile(workbook, fileName);
+        console.log('Excel file created and downloaded');
         
         // Reset the button text and state
         $('#exportToExcel').text('Export to Excel').prop('disabled', false);
