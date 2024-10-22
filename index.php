@@ -47,7 +47,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         top: 0;
         width: 250px;
         height: 100vh;
-        background-color: #f8f9fa;
+        background-color: #343a40; /* Darker background color */
+        color: #fff; /* Light text color for contrast */
         padding: 20px;
         transition: width 0.3s;
         display: flex;
@@ -71,8 +72,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         display: flex;
         align-items: center;
         padding: 10px;
-        color: #333;
+        color: #f8f9fa; /* Light color for better visibility */
         text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    .nav-link:hover {
+        background-color: #495057; /* Slightly lighter on hover for feedback */
+    }
+    .nav-link.active {
+        background-color: #007bff; /* Highlight active link */
     }
     .nav-link i {
         margin-right: 10px;
@@ -92,6 +100,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         transition: background-color 0.3s;
         display: flex;
         align-items: center;
+    }
+    .logout-btn:hover {
+        background-color: #495057; /* Slightly lighter on hover */
     }
   </style>
   
@@ -117,7 +128,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 </head>
 
 <body>
-  <div class="sidebar" id="sidebar">
+  <div class="sidebar collapsed" id="sidebar">
     <div class="logo">
         <!-- Add your logo here -->
         <img src="Logo/khglogo.png" alt="Logo" style="max-width: 100%; height: auto;">
@@ -137,28 +148,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         <span>Logout</span>
     </a>
   </div>
-  <div class="content" id="content">
+  <div class="content sidebar-collapsed" id="content">
     <div id="dashboard-tab" class="tab-content active">
         <!-- Your existing dashboard content goes here -->
         <div class="container-fluid">
-            <div class="dashboard-header">
-                <h2 class="dashboard-title">WELCOME TO KAHLIFA HOLDING CO</h2>
-                <div class="header-separator"></div>
-                <p class="dashboard-subtitle">حصر سيارات خليفة القابضة</p>
-            </div>
             <div class="row">
               <div class="container">
                 <div class="btnAdd">
-                <!-- Remove this line -->
-                <!-- <a href="logout.php" class="btn btn-danger btn-sm">Logout</a> -->
                   <a href="#!" data-id="" data-bs-toggle="modal" data-bs-target="#addUserModal" class="btn btn-success btn-sm">اضافة سيارة جديدة</a>
                   <button id="exportToExcel" class="btn btn-info btn-sm">حمل ملف اكسل </button>
                   <!-- New button and form for file upload -->
                   <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importUsersModal">csvاضافة عمال من ملف</button>
                 </div>
                 <div class="row">
-                  <div class="col-md-2"></div>
-                  <div class="col-md-8">
+                  <div class="col-md-12"></div>
+                  
                     <table id="example" class="table">
                       <thead>
                         <th>No.</th>
@@ -177,7 +181,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                     </table>
                     <div id="totalCount" style="text-align: center; font-size: 1.25rem; font-weight: bold; color: #333; margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);"></div>
                   </div>
-                  <div class="col-md-2"></div>
                 </div>
               </div>
             </div>
@@ -444,72 +447,78 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
       }
     })
     
+    // Replace the existing exportToExcel function with this updated version
     $('#exportToExcel').on('click', function() {
         console.log('Export button clicked');
-        // Show a loading indicator
         $('#exportToExcel').text('Loading...').prop('disabled', true);
         
-        // Get the DataTable instance
         var table = $('#example').DataTable();
         
-        // Check if there are any filters applied
-        var isFiltered = table.search() !== '' || table.columns().search().any();
-        console.log('Is filtered:', isFiltered);
+        // Get the current search value
+        var search = table.search();
         
-        if (isFiltered) {
-            console.log('Exporting filtered data');
-            // If there are filtered rows, prepare them for export
-            var filteredData = table.rows({ filter: 'applied' }).data().toArray();
-            console.log('Filtered data length:', filteredData.length);
-            prepareAndExportData(filteredData);
-        } else {
-            console.log('Fetching all data');
-            // If no rows are filtered, fetch all data
-            $.ajax({
-                url: 'fetch_all_data.php',
-                type: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    console.log('Data fetched successfully');
-                    if (response.data && Array.isArray(response.data)) {
-                        console.log('Data is valid. Length:', response.data.length);
-                        prepareAndExportData(response.data);
-                    } else {
-                        console.error('Invalid data format received', response);
-                        alert('Error preparing data for export.');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error fetching all data:', error);
-                    alert('Error fetching data for export.');
-                },
-                complete: function() {
-                    // Reset the button text and state
-                    $('#exportToExcel').text('Export to Excel').prop('disabled', false);
+        // Get header filter values
+        var headerFilters = [];
+        table.columns().every(function(index) {
+            var column = this;
+            var select = $(column.header()).find('select');
+            if (select.length > 0) {
+                headerFilters.push(select.val() || '');
+            } else {
+                headerFilters.push('');
+            }
+        });
+
+        console.log('Search:', search);
+        console.log('Header filters:', headerFilters);
+
+        // Make an AJAX call to fetch all filtered data
+        $.ajax({
+            url: 'fetch_all_data.php',
+            type: 'POST',
+            data: {
+                filtered: true,
+                search: search,
+                headerFilters: headerFilters
+            },
+            success: function(response) {
+                console.log('Server response:', response);
+                var json = JSON.parse(response);
+                if (json.data && json.data.length > 0) {
+                    prepareAndExportData(json.data);
+                } else {
+                    alert('No data to export.');
                 }
-            });
-        }
+                $('#exportToExcel').text('Export to Excel').prop('disabled', false);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching data for export:', error);
+                alert('Error fetching data for export: ' + error);
+                $('#exportToExcel').text('Export to Excel').prop('disabled', false);
+            }
+        });
     });
 
     function prepareAndExportData(rawData) {
         console.log('Preparing data for export. Raw data length:', rawData.length);
         var exportData = rawData.map(function(row) {
             return [
-                row.id || row[0],
-                row.carname || row[1],
-                row.vin || row[2],
-                row.plate_number || row[3],
-                row.car_model || row[4],
-                row.car_color || row[5],
-                row.company_name || row[6],
-                row.location || row[7],
-                (row.gps || row[8] || '').replace(/<[^>]+>/g, '') // Clean up GPS data
+                row.id,
+                row.carname,
+                row.vin,
+                row.plate_number,
+                row.car_model,
+                row.car_color,
+                row.company_name,
+                row.location,
+                row.gps
             ];
         });
         console.log('Export data prepared. Length:', exportData.length);
         exportToExcel(exportData);
     }
 
+    // The exportToExcel function remains the same
     function exportToExcel(data) {
         console.log('Exporting to Excel. Data length:', data.length);
         // Define headers for the Excel file
@@ -526,9 +535,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         // Save the file
         XLSX.writeFile(workbook, fileName);
         console.log('Excel file created and downloaded');
-        
-        // Reset the button text and state
-        $('#exportToExcel').text('Export to Excel').prop('disabled', false);
     }
 
   </script>
@@ -537,7 +543,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">تحديث معلومات العامل</h5>
+          <h5 class="modal-title" id="exampleModalLabel">تحديث معلومات ا السيارة</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -641,7 +647,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="addCarColorField" class="col-md-3 form-label">لون السيارة</label>
+              <label for="addCarColorField" class="col-md-3 form-label">لن السيارة</label>
               <div class="col-md-9">
                 <input type="text" class="form-control" id="addCarColorField" name="car_color">
               </div>

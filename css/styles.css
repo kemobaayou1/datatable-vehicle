@@ -9,6 +9,10 @@ body {
 
 .container-fluid {
     padding: 2rem;
+    width: 95%;
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #example {
@@ -16,6 +20,7 @@ body {
     border-collapse: separate;
     border-spacing: 0 0.5rem;
     background-color: transparent;
+    table-layout: fixed;
 }
 
 #example thead th {
@@ -95,8 +100,10 @@ body {
 
 .btnAdd {
     text-align: right;
-    width: 83%;
+    width: 95%;
     margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #workReportTable {
@@ -170,6 +177,9 @@ body {
 .dashboard-header {
     text-align: center;
     margin-bottom: 2rem;
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .dashboard-title {
@@ -293,12 +303,13 @@ thead select {
     top: 0;
     width: 250px;
     height: 100vh;
-    background-color: #f8f9fa;
+    background-color: #1668b9; /* Darker background color */
     padding: 20px;
     transition: width 0.3s;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    color: #13809b; /* Lighter text color for better contrast */
 }
 
 .sidebar.collapsed {
@@ -307,14 +318,16 @@ thead select {
 
 .content {
     flex: 1;
-    margin-left: 250px; /* Same as sidebar width */
+    margin-left: 250px;
     transition: margin-left 0.3s;
     padding: 20px;
     overflow-y: auto;
+    width: calc(100% - 250px); /* Subtract sidebar width from total width */
 }
 
 .content.sidebar-collapsed {
-    margin-left: 80px; /* Same as collapsed sidebar width */
+    margin-left: 80px;
+    width: calc(100% - 80px); /* Adjust for collapsed sidebar */
 }
 
 .sidebar nav {
@@ -328,15 +341,15 @@ thead select {
     display: flex;
     align-items: center;
     padding: 10px;
-    color: #333;
+    color: #ecf0f1; /* Lighter text color */
     text-decoration: none;
     border-radius: 5px;
-    margin-bottom: 15px; /* Increase space between nav links */
+    margin-bottom: 15px;
     transition: background-color 0.3s;
 }
 
 .nav-link:hover, .nav-link.active {
-    background-color: #e9ecef;
+    background-color: #34495e; /* Darker hover/active background */
 }
 
 .nav-link i {
@@ -356,18 +369,18 @@ thead select {
 .logout-btn {
     margin-top: auto;
     padding: 10px;
-    color: #dc3545;
+    color: #e74c3c; /* Brighter color for logout button */
     text-decoration: none;
     border-radius: 5px;
     transition: background-color 0.3s;
     display: flex;
     align-items: center;
-    border-top: 1px solid #dee2e6; /* Add a separator line */
-    padding-top: 20px; /* Add space above the logout button */
+    border-top: 1px solid #34495e; /* Darker separator line */
+    padding-top: 20px;
 }
 
 .logout-btn:hover {
-    background-color: #e9ecef;
+    background-color: #34495e; /* Darker hover background */
 }
 
 .sidebar.collapsed .logout-btn {
@@ -382,7 +395,7 @@ thead select {
 .sidebar .logo {
     margin-bottom: 20px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid #34495e; /* Darker separator line */
 }
 
 /* Adjust the last nav-link to remove extra bottom margin */
