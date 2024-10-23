@@ -155,10 +155,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             <div class="row">
               <div class="container">
                 <div class="btnAdd">
-                  <a href="#!" data-id="" data-bs-toggle="modal" data-bs-target="#addUserModal" class="btn btn-success btn-sm">اضافة سيارة جديدة</a>
-                  <button id="exportToExcel" class="btn btn-info btn-sm">حمل ملف اكسل </button>
-                  <!-- New button and form for file upload -->
-                  <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importUsersModal">csvاضافة عمال من ملف</button>
+                  <button data-id="" data-bs-toggle="modal" data-bs-target="#addUserModal" class="btn btn-rounded btn-add">
+                    <i class="fas fa-plus"></i> اضافة سيارة جديدة
+                  </button>
+                  <button id="exportToExcel" class="btn btn-rounded btn-export">
+                    <i class="fas fa-file-excel"></i> حمل ملف اكسل
+                  </button>
+                  <button type="button" class="btn btn-rounded btn-import" data-bs-toggle="modal" data-bs-target="#importUsersModal">
+                    <i class="fas fa-file-import"></i> اضافة عمال من ملف csv
+                  </button>
                 </div>
                 <div class="row">
                   <div class="col-md-12"></div>
@@ -187,9 +192,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         </div>
     </div>
     <div id="history-tab" class="tab-content" style="display: none;">
-        <!-- Add your history content here -->
-        <h2>History</h2>
-        <p>This is the history tab. Add your content here.</p>
+        <div class="history-content">
+            <h2>History</h2>
+            <p>This is the history tab. Add your content here.</p>
+        </div>
     </div>
   </div>
   <!-- Optional JavaScript; choose one of the two! -->
@@ -454,8 +460,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         
         var table = $('#example').DataTable();
         
-        // Get the current search value
+        // Get the current search value and column-specific filters
         var search = table.search();
+        var columnFilters = table.columns().search().toArray();
         
         // Get header filter values
         var headerFilters = [];
@@ -470,6 +477,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         });
 
         console.log('Search:', search);
+        console.log('Column filters:', columnFilters);
         console.log('Header filters:', headerFilters);
 
         // Make an AJAX call to fetch all filtered data
@@ -479,6 +487,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             data: {
                 filtered: true,
                 search: search,
+                columns: columnFilters,
                 headerFilters: headerFilters
             },
             success: function(response) {
@@ -711,26 +720,59 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
   <script>
   $(document).ready(function() {
     $('#importUsersForm').on('submit', function(e) {
-      e.preventDefault();
-      var formData = new FormData(this);
-      $.ajax({
-        url: 'import_users.php',
-        type: 'POST',
-        data: formData,
-        success: function(data) {
-          $('#importUsersModal').modal('hide');
-          alert(data.message); // Use browser's alert function
-          if (data.success) {
-            location.reload(); // Optionally refresh the page or update the user list
-          }
-        },
-        error: function(xhr, status, error) {
-          alert('An error occurred: ' + error);
-        },
-        cache: false,
-        contentType: false,
-        processData: false
-      });
+        e.preventDefault();
+        var formData = new FormData(this);
+        
+        // Show loading state
+        var submitButton = $(this).find('button[type="submit"]');
+        var originalText = submitButton.text();
+        submitButton.prop('disabled', true).text('Uploading...');
+        
+        $.ajax({
+            url: 'import_users.php',
+            type: 'POST',
+            data: formData,
+            dataType: 'json', // Explicitly expect JSON response
+            success: function(response) {
+                console.log("Response received:", response);
+                
+                if (response.success) {
+                    $('#importUsersModal').modal('hide');
+                    alert(response.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + (response.message || 'Unknown error occurred'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error details:', {
+                    status: status,
+                    error: error,
+                    response: xhr.responseText
+                });
+                
+                // Try to parse the response if it exists
+                let errorMessage = 'An error occurred while importing the file';
+                try {
+                    if (xhr.responseText) {
+                        const response = JSON.parse(xhr.responseText);
+                        errorMessage = response.message || errorMessage;
+                    }
+                } catch (e) {
+                    console.error('Error parsing response:', e);
+                    errorMessage += '\nServer response: ' + xhr.responseText;
+                }
+                
+                alert(errorMessage);
+            },
+            complete: function() {
+                // Reset button state
+                submitButton.prop('disabled', false).text(originalText);
+            },
+            cache: false,
+            contentType: false,
+            processData: false
+        });
     });
   });
   </script>

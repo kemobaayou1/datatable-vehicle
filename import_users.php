@@ -1,109 +1,138 @@
 <?php
-header('Content-Type: application/json');
+// Prevent any output before headers
+ob_start();
 
-require_once 'vendor/autoload.php';
-use League\Csv\Reader;
-use League\Csv\Writer;
+// Set headers
+header('Content-Type: application/json; charset=utf-8');
 
-// Database connections
-$conn = new mysqli("localhost", "root", "", "datatables_crud");
-$id_tracker_conn = new mysqli("localhost", "root", "", "id_tracker");
+try {
+    include('connection.php');
+    include('includes/logger.php');
 
-if ($conn->connect_error) {
-    die(json_encode(['success' => false, 'message' => "Connection failed: " . $conn->connect_error]));
-}
-
-if ($id_tracker_conn->connect_error) {
-    die(json_encode(['success' => false, 'message' => "Connection to id_tracker failed: " . $id_tracker_conn->connect_error]));
-}
-
-// Check for memory limits (adjust as needed)
-if (ini_get('memory_limit') < '128M') {
-    ini_set('memory_limit', '128M');
-}
-
-if (isset($_FILES["fileToUpload"]) && $_FILES["fileToUpload"]["error"] == 0) {
-    $allowedFileTypes = ['text/csv'];
-
-    // Get file MIME type using finfo
-    $finfo = finfo_open(FILEINFO_MIME_TYPE); 
-    $fileType = finfo_file($finfo, $_FILES["fileToUpload"]["tmp_name"]); 
-    finfo_close($finfo); 
-
-    if (in_array($fileType, $allowedFileTypes)) {
-        $targetDir = "uploads/";
-        $targetFile = $targetDir . basename($_FILES["fileToUpload"]["name"]);
-
-        if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $targetFile)) {
-            $reader = Reader::createFromPath($targetFile, 'r');
-            $reader->setHeaderOffset(0);
-
-            $records = $reader->getRecords();
-
-            $conn->begin_transaction();
-            $id_tracker_conn->begin_transaction();
-
-            try {
-                // Get the maximum ID from the users table
-                $sql = "SELECT MAX(id) as max_id FROM users";
-                $result = $conn->query($sql);
-                $row = $result->fetch_assoc();
-                $maxId = $row['max_id'];
-
-                $startId = $maxId + 1;
-
-                $insertedRows = 0;
-                foreach ($records as $record) {
-                    $carname = $record['carname'];
-                    $vin = $record['vin'];
-                    $plate_number = $record['plate_number'];
-                    $car_model = $record['car_model'];
-                    $car_color = $record['car_color'];
-                    $company_name = $record['company_name'];
-                    $location = $record['location'];
-
-                    $sql = "INSERT INTO users (id, carname, vin, plate_number, car_model, car_color, company_name, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                    $stmt = $conn->prepare($sql);
-                    $stmt->bind_param("isssssss", $startId, $carname, $vin, $plate_number, $car_model, $car_color, $company_name, $location);
-                    $stmt->execute();
-
-                    if ($stmt->error) {
-                        throw new Exception("Error inserting record: " . $stmt->error);
-                    } else {
-                        $insertedRows++;
-                        $startId++;
-                    }
-                }
-
-                $sql = "UPDATE id_tracker SET next_id = ?";
-                $stmt = $id_tracker_conn->prepare($sql);
-                $stmt->bind_param("i", $startId);
-                $stmt->execute();
-
-                if ($stmt->error) {
-                    throw new Exception("Error updating id_tracker: " . $stmt->error);
-                }
-
-                $conn->commit();
-                $id_tracker_conn->commit();
-
-                unlink($targetFile);
-                echo json_encode(['success' => true, 'message' => "تمت اضافة   " . $insertedRows . "  عامل بنجاح"]);
-            } catch (Exception $e) {
-                $conn->rollback();
-                $id_tracker_conn->rollback();
-                echo json_encode(['success' => false, 'message' => "Error: " . $e->getMessage()]);
-            }
-        } else {
-            echo json_encode(['success' => false, 'message' => "Error uploading file."]);
-        }
-    } else {
-        echo json_encode(['success' => false, 'message' => "Invalid file type. Please upload a CSV file."]);
+    if (!isset($_FILES['fileToUpload'])) {
+        throw new Exception('No file uploaded');
     }
-} else {
-    echo json_encode(['success' => false, 'message' => "Please select a file to upload."]);
+
+    $file = $_FILES['fileToUpload'];
+    
+    // Log file upload details
+    error_log("File upload details: " . print_r($file, true));
+    
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('File upload error: ' . $file['error']);
+    }
+
+    $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+    // Check if it's a CSV file
+    if ($file_extension !== 'csv') {
+        throw new Exception('Only CSV files are allowed');
+    }
+
+    // Set internal character encoding to UTF-8
+    mysqli_set_charset($con, "utf8mb4");
+
+    // Open the uploaded file with UTF-8 encoding
+    $handle = fopen($file['tmp_name'], 'r');
+    if ($handle === false) {
+        throw new Exception('Failed to open file');
+    }
+
+    // Remove BOM if present
+    fgets($handle, 4) === "\xEF\xBB\xBF" ? rewind($handle) : rewind($handle);
+
+    // Force UTF-8 encoding for the file reading
+    stream_filter_append($handle, 'convert.iconv.UTF-8/UTF-8//IGNORE');
+
+    // Read the header row
+    $header = fgetcsv($handle);
+    if ($header === false) {
+        throw new Exception('Empty file');
+    }
+
+    // Clean header values
+    $header = array_map(function($value) {
+        return trim(str_replace("\xEF\xBB\xBF", '', $value)); // Remove BOM and trim
+    }, $header);
+
+    // Expected columns
+    $expected_columns = ['carname', 'vin', 'plate_number', 'car_model', 'car_color', 'company_name', 'location', 'gps'];
+    
+    // Verify header matches expected columns
+    if (count(array_diff($expected_columns, $header)) > 0) {
+        throw new Exception('Invalid CSV format. Required columns: ' . implode(', ', $expected_columns));
+    }
+
+    // Begin transaction
+    mysqli_begin_transaction($con);
+
+    $success_count = 0; // Initialize this variable
+    $row_number = 1;
+
+    // Prepare the insert statement
+    $stmt = $con->prepare("INSERT INTO users (carname, vin, plate_number, car_model, car_color, company_name, location, gps) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
+    // Read and insert data rows
+    while (($data = fgetcsv($handle)) !== false) {
+        $row_number++;
+        
+        // Skip empty rows
+        if (empty(array_filter($data))) {
+            continue;
+        }
+
+        // Validate row data
+        if (count($data) !== count($expected_columns)) {
+            throw new Exception("Row $row_number has invalid number of columns");
+        }
+
+        // Clean data values
+        $data = array_map('trim', $data);
+
+        // Bind parameters and execute
+        $stmt->bind_param("ssssssss", $data[0], $data[1], $data[2], $data[3], $data[4], $data[5], $data[6], $data[7]);
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Error inserting row $row_number: " . $stmt->error);
+        }
+
+        $success_count++;
+    }
+
+    // Commit transaction
+    mysqli_commit($con);
+    
+    fclose($handle);
+    $stmt->close();
+
+    // Clear any output buffers
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    // Send success response
+    echo json_encode([
+        'success' => true,
+        'message' => "Successfully imported $success_count records"
+    ]);
+
+} catch (Exception $e) {
+    // Log the error
+    error_log("Import error: " . $e->getMessage());
+    
+    // Clear any output buffers
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    // Send error response
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
 
-$conn->close();
-$id_tracker_conn->close();
+// Make sure the script ends here
+exit();
 ?>

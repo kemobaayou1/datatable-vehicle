@@ -17,37 +17,34 @@ body {
 
 #example {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 0.5rem;
-    background-color: transparent;
-    table-layout: fixed;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #example thead th {
     background-color: #f0f0f0;
-    color: #666;
+    color: #333;
     font-weight: 600;
     padding: 1rem;
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
-    border: none;
+    border-bottom: 2px solid #007bff;
 }
 
 #example tbody tr {
     background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease;
 }
 
 #example tbody tr:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f1f1f1;
 }
 
 #example tbody td {
     padding: 1rem;
-    border: none;
+    border: 1px solid #e0e0e0;
     vertical-align: middle;
 }
 
@@ -76,26 +73,33 @@ body {
 }
 
 .btn-info {
-    background-color: #e6f3ff;
-    color: #0066cc;
-    border: none;
-}
-
-.btn-danger {
-    background-color: #fde8e8;
-    color: #e12d39;
-    border: none;
-}
-
-.btn-primary {
-    background-color: #0066cc;
+    background-color: #007bff;
     color: #ffffff;
     border: none;
 }
 
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.btn-info:hover {
+    background-color: #0056b3;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-primary {
+    background-color: #28a745;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #218838;
 }
 
 .btnAdd {
@@ -405,4 +409,168 @@ thead select {
 
 .sidebar nav {
     padding-top: 20px;
+}
+
+/* Update table styles for a cleaner look */
+#example {
+    width: 100%;
+    border-collapse: collapse; /* Change to collapse for a cleaner look */
+    background-color: #ffffff; /* Set a white background for the table */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+#example thead th {
+    background-color: #f0f0f0; /* Light gray background for header */
+    color: #333; /* Darker text color for better contrast */
+    font-weight: 600;
+    padding: 1rem;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #007bff; /* Add a bottom border for separation */
+}
+
+#example tbody tr {
+    background-color: #ffffff; /* White background for rows */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+#example tbody tr:hover {
+    background-color: #f1f1f1; /* Light gray background on hover */
+}
+
+#example tbody td {
+    padding: 1rem;
+    border: 1px solid #e0e0e0; /* Add borders to cells for separation */
+    vertical-align: middle;
+}
+
+/* Badge styles for status indicators */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+/* Button styles */
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-info {
+    background-color: #007bff; /* Change to a blue background */
+    color: #ffffff; /* White text */
+    border: none;
+}
+
+.btn-info:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.btn-danger {
+    background-color: #dc3545; /* Red background */
+    color: #ffffff; /* White text */
+    border: none;
+}
+
+.btn-danger:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+.btn-primary {
+    background-color: #28a745; /* Green background */
+    color: #ffffff; /* White text */
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+/* Adjust modal styles for better display */
+.modal-content {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Form styles */
+.form-control {
+    border-radius: 0.25rem;
+    border: 1px solid #e0e0e0;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: #007bff; /* Blue border on focus */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Blue shadow on focus */
+}
+
+/* Sidebar styles */
+.sidebar {
+    background-color: #343a40; /* Darker background color */
+    color: #fff; /* Light text color for contrast */
+}
+
+/* Adjust the last nav-link to remove extra bottom margin */
+.sidebar nav .nav-link:last-child {
+    margin-bottom: 0;
+}
+
+/* Add styles for the header separator */
+.header-separator {
+    width: 50px;
+    height: 3px;
+    background-color: #007bff; /* Blue separator */
+    margin: 0.75rem auto;
+}
+
+/* Add these new styles for the rounded buttons with icons */
+.btn-rounded {
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+    font-weight: 500;
+}
+
+.btn-rounded i {
+    margin-right: 8px;
+}
+
+.btn-add {
+    background-color: #28a745;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-add:hover {
+    background-color: #218838;
+}
+
+.btn-export {
+    background-color: #17a2b8;
+    color: #ffffff;
+    border: none;
+}
+
+.btn-export:hover {
+    background-color: #138496;
+}
+
+.btn-import {
+    background-color: #ffc107;
+    color: #212529;
+    border: none;
+}
+
+.btn-import:hover {
+    background-color: #e0a800;
 }
