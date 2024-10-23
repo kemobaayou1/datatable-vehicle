@@ -193,8 +193,19 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     </div>
     <div id="history-tab" class="tab-content" style="display: none;">
         <div class="history-content">
-            <h2>History</h2>
-            <p>This is the history tab. Add your content here.</p>
+            <h2>تاريخ التحركات</h2>
+            <div class="event-log-container">
+                <!-- Remove this div containing the date filter -->
+                <!-- <div class="event-log-filters">
+                    <input type="date" id="dateFilter" class="form-control">
+                </div> -->
+                <div class="event-log-box" id="eventLogBox">
+                    <!-- Logs will be loaded here -->
+                </div>
+                <div class="event-log-pagination">
+                    <button id="loadMoreLogs" class="btn btn-primary">Load More</button>
+                </div>
+            </div>
         </div>
     </div>
   </div>
@@ -545,6 +556,79 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
         XLSX.writeFile(workbook, fileName);
         console.log('Excel file created and downloaded');
     }
+
+    // Event Log functionality
+    $(document).ready(function() {
+        let currentPage = 1;
+        let loading = false;
+        let hasMore = true;
+
+        function loadEventLogs(page = 1, append = false) {
+            $.ajax({
+                url: 'get_event_logs.php',
+                type: 'GET',
+                data: {
+                    page: page
+                },
+                success: function(response) {
+                    const eventLogBox = $('#eventLogBox');
+                    let html = '';
+                    
+                    response.logs.forEach(log => {
+                        // Check if username exists and is not null/empty
+                        const displayUsername = log.username ? log.username : 'Unknown';
+                        
+                        html += `
+                            <div class="event-log-item">
+                                <div class="event-icon ${log.event_type}">
+                                    ${getEventIcon(log.event_type)}
+                                </div>
+                                <div class="event-details">
+                                    <div class="event-timestamp">${formatTimestamp(log.timestamp)}</div>
+                                    <div class="event-user">User: ${displayUsername}</div>
+                                    <div class="event-message">${log.message}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    if (append) {
+                        eventLogBox.append(html);
+                    } else {
+                        eventLogBox.html(html);
+                    }
+
+                    // Show/hide load more button based on whether there are more logs
+                    $('#loadMoreLogs').toggle(response.hasMore);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading event logs:', error);
+                }
+            });
+        }
+
+        function getEventIcon(eventType) {
+            switch(eventType) {
+                case 'add': return '<i class="fas fa-plus"></i>';
+                case 'update': return '<i class="fas fa-edit"></i>';
+                case 'delete': return '<i class="fas fa-trash"></i>';
+                default: return '<i class="fas fa-info"></i>';
+            }
+        }
+
+        function formatTimestamp(timestamp) {
+            return new Date(timestamp).toLocaleString();
+        }
+
+        // Initial load
+        loadEventLogs();
+
+        // Load more
+        $('#loadMoreLogs').on('click', function() {
+            currentPage++;
+            loadEventLogs(currentPage, true);
+        });
+    });
 
   </script>
   <!-- Modal -->

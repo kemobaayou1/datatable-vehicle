@@ -574,3 +574,191 @@ thead select {
 .btn-import:hover {
     background-color: #e0a800;
 }
+
+/* Event Log Styles */
+.event-log-container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin: 20px 0; /* Remove auto margin */
+    width: 100%; /* Make it full width */
+    max-width: none; /* Remove the maximum width limitation */
+}
+
+.event-log-filters {
+    display: flex;
+    justify-content: flex-start; /* Align to the left instead of center */
+    gap: 15px;
+    margin: 20px 0;
+    padding: 0 15px; /* Add some padding */
+}
+
+.event-log-filters input {
+    max-width: 200px;
+}
+
+.event-log-box {
+    height: 600px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    margin: 20px 0;
+    width: 100%; /* Ensure full width */
+}
+
+.event-log-item {
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    background-color: white;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.event-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.event-icon.add {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.event-icon.update {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.event-icon.delete {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.event-details {
+    flex-grow: 1;
+    line-height: 1.5;
+}
+
+.event-timestamp {
+    color: #6c757d;
+    font-size: 0.85em;
+    margin-bottom: 5px;
+}
+
+.event-message {
+    margin: 8px 0;
+    color: #333;
+    white-space: pre-line; /* Preserve line breaks in messages */
+}
+
+.event-user {
+    font-weight: 500;
+    color: #0066cc;
+}
+
+.event-log-pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#loadMoreLogs {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 8px 20px;
+    border-radius: 20px;
+    color: #495057;
+    transition: all 0.3s ease;
+}
+
+#loadMoreLogs:hover {
+    background-color: #e9ecef;
+    color: #212529;
+}
+
+/* Update the content styles */
+.content {
+    margin-left: 250px;
+    padding: 20px;
+    width: calc(100% - 250px);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content horizontally */
+}
+
+.content.sidebar-collapsed {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+}
+
+/* Update dashboard tab styles */
+#dashboard-tab {
+    width: 100%;
+}
+
+/* Update history tab styles */
+#history-tab {
+    width: 100%;
+    max-width: none; /* Remove the maximum width limitation */
+    padding: 20px;
+}
+
+/* Update event log container styles */
+.event-log-container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin: 20px 0; /* Remove auto margin */
+    width: 100%; /* Make it full width */
+    max-width: none; /* Remove the maximum width limitation */
+}
+
+.history-content {
+    width: 100%;
+    max-width: none; /* Remove the maximum width limitation */
+    padding: 0 20px; /* Add some padding on the sides */
+}
+
+.history-content h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Update event log box styles */
+.event-log-box {
+    height: 600px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    margin: 20px 0;
+    width: 100%; /* Ensure full width */
+}
+
+/* Update event log filters */
+.event-log-filters {
+    display: flex;
+    justify-content: flex-start; /* Align to the left instead of center */
+    gap: 15px;
+    margin: 20px 0;
+    padding: 0 15px; /* Add some padding */
+}
+
+.event-log-filters input {
+    max-width: 200px;
+}
