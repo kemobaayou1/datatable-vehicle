@@ -14,6 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Bootstrap CSS --> 
   <link href="css/bootstrap5.0.1.min.css" rel="stylesheet" crossorigin="anonymous">
@@ -162,7 +163,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                     <i class="fas fa-file-excel"></i> حمل ملف اكسل
                   </button>
                   <button type="button" class="btn btn-rounded btn-import" data-bs-toggle="modal" data-bs-target="#importUsersModal">
-                    <i class="fas fa-file-import"></i> اضافة عمال من ملف csv
+                    <i class="fas fa-file-import"></i> اضافة سيارة من ملف csv
                   </button>
                 </div>
                 <div class="row">
@@ -740,7 +741,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="addUser" action="">
+          <form id="addUser" action="" method="POST" accept-charset="utf-8">
             <div class="mb-3 row">
               <label for="addUserField" class="col-md-3 form-label">اسم السيارة</label>
               <div class="col-md-9">
@@ -808,7 +809,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="importUsersModalLabel">اضف عمال من ملف</h5>
+          <h5 class="modal-title" id="importUsersModalLabel">اضف سيارة من ملف</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">

@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             position: relative;
             width: 100%;
             height: 100%;
-            background: url('image/big.jpg') center/cover no-repeat;
+            background: url('image/bi.jpg') center/cover no-repeat;
             filter: brightness(0.8);
         }
         .overlay-text {
