@@ -257,16 +257,29 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
             }
           },
           {
-            "targets": [8, 9], // Disable filtering for GPS and Options columns
+            "targets": [8, 9], // Disable filtering for GPS and Options columns 
             "searchable": false // Disable searching for these columns
           }
         ],
-        "pageLength": 10,
+        "pageLength": 25,
         "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
         initComplete: function () {
-            this.api().columns().every(function () {
+            var api = this.api();
+            
+            // Function to get unique values from all data
+            function getUniqueValues(columnIndex) {
+                return api.column(columnIndex)
+                    .data()
+                    .flatten() // Flatten the data array
+                    .unique() // Get unique values
+                    .sort() // Sort the values
+                    .toArray(); // Convert to array
+            }
+            
+            api.columns().every(function () {
                 var column = this;
                 if (column.index() !== 8 && column.index() !== 9) { // Exclude GPS and Options columns
+                    // Create select element
                     var select = $('<select><option value="">All</option></select>')
                         .appendTo($(column.header()))
                         .on('change', function () {
@@ -277,9 +290,22 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
                                 .search(val ? val : '', true, false)
                                 .draw();
                         });
-
-                    column.data().unique().sort().each(function (d, j) {
-                        select.append('<option value="'+d+'">'+d+'</option>')
+                    
+                    // Get all unique values for this column from server
+                    $.ajax({
+                        url: 'get_column_values.php',
+                        type: 'POST',
+                        data: {
+                            column: column.index()
+                        },
+                        success: function(response) {
+                            // Add options to select
+                            response.values.forEach(function(value) {
+                                if (value) { // Only add non-empty values
+                                    select.append('<option value="' + value + '">' + value + '</option>');
+                                }
+                            });
+                        }
                     });
                 }
             });

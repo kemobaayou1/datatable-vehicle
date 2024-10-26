@@ -61,159 +61,176 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - ABER-AL-ALAM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body, html {
             height: 100%;
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
+            font-family: 'Poppins', sans-serif;
         }
-        .background {
-            background-image: url('image/login_bg.jpg');
-            height: 100%;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        .login-container {
-            background-color: #ffffff;
-            padding: 60px;
-            border-radius: 20px;
-            box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.1),
-                0 20px 48px rgba(0, 0, 0, 0.1),
-                0 30px 66px rgba(0, 0, 0, 0.06);
-            width: 500px;
-            max-width: 90%;
             position: relative;
             overflow: hidden;
-            transform: translateY(-20px);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .login-container:hover {
-            transform: translateY(-25px);
-            box-shadow: 
-                0 14px 30px rgba(0, 0, 0, 0.15),
-                0 24px 60px rgba(0, 0, 0, 0.15),
-                0 34px 80px rgba(0, 0, 0, 0.1);
+        .car-showcase {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: url('image/big.jpg') center/cover no-repeat;
+            filter: brightness(0.8);
         }
-        .login-container::before {
-            content: '';
+        .overlay-text {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 150px;
-            background: linear-gradient(to bottom, #bcdaf5, #ffffff);
-            z-index: 0;
+            bottom: 50px;
+            left: 50px;
+            color: white;
+            z-index: 2;
         }
-        .login-title {
-            font-size: 32px;
+        .overlay-text h1 {
+            font-size: 3.5rem;
+            margin: 0;
             font-weight: 700;
-            color: #333;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+        .overlay-text p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        .right-panel {
+            flex: 1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .login-form {
+            width: 400px;
+            max-width: 100%;
+        }
+        .login-header {
             margin-bottom: 40px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
+            text-align: left;
         }
-        .wave-icon {
-            font-size: 46px;
-            margin-left: 10px;
-            vertical-align: middle;
-            display: inline-block;
-            animation: wave 2s infinite;
-            transform-origin: 70% 70%;
-            position: relative;
-            top: -8px; /* This moves the icon up */
+        .login-header h2 {
+            font-size: 32px;
+            color: #1a1a1a;
+            margin-bottom: 10px;
         }
-        @keyframes wave {
-            0% { transform: rotate(0deg); }
-            10% { transform: rotate(14deg); }
-            20% { transform: rotate(-8deg); }
-            30% { transform: rotate(14deg); }
-            40% { transform: rotate(-4deg); }
-            50% { transform: rotate(10deg); }
-            60% { transform: rotate(0deg); }
-            100% { transform: rotate(0deg); }
+        .login-header p {
+            color: #666;
+            font-size: 16px;
         }
         .form-group {
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
+            margin-bottom: 25px;
         }
         .form-label {
             display: block;
-            font-size: 16px;
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
         }
         .form-control {
-            width: 100%;
+            width: calc(100% - 30px);
             padding: 15px;
-            font-size: 18px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #eee;
             border-radius: 12px;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            box-sizing: border-box;
         }
         .form-control:focus {
+            border-color: #1a1a1a;
+            background: white;
             outline: none;
-            border-color: #67b2ff;
-            box-shadow: 0 0 0 4px rgba(103, 178, 255, 0.1);
         }
         .btn-login {
-            width: 100%;
+            width: 60%;
             padding: 15px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #ffffff;
-            background-color: #67b2ff;
+            background: #1a1a1a;
+            color: white;
             border: none;
             border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            position: relative;
-            z-index: 1;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
         }
         .btn-login:hover {
-            background-color: #4a9eff;
-        }
-        .btn-login:active {
-            transform: scale(0.98);
+            background: #333;
+            transform: translateY(-2px);
         }
         .error-message {
             color: #dc3545;
-            font-size: 16px;
+            font-size: 14px;
             margin-top: 15px;
             text-align: center;
-            position: relative;
-            z-index: 1;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .left-panel {
+                display: none;
+            }
+            .right-panel {
+                padding: 20px;
+            }
+        }
+        /* Add a container div for the button to match form-group width */
+        .button-container {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0 15px;
         }
     </style>
 </head>
 <body>
-    <div class="background">
-        <div class="login-container">
-            <h2 class="login-title">hey, hello <span class="wave-icon">👋</span></h2>
-            <h3 class="login-title">WELCOME TO ABER-AL-ALAM DASHBOARD</h3>
-            <?php if (isset($error)): ?>
-                <div class="error-message"><?php echo $error; ?></div>
-            <?php endif; ?>
-            <form method="POST" action="">
-                <div class="form-group">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
+    <div class="container">
+        <div class="left-panel">
+            <div class="car-showcase"></div>
+            <div class="overlay-text">
+                <h1>KHALIFA HOLDINGS GROUP</h1>
+                <p>Car Management System</p>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="login-form">
+                <div class="login-header">
+                    <h2>Welcome Back</h2>
+                    <p>Please sign in to continue</p>
                 </div>
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
-                <button type="submit" class="btn-login">Sign In</button>
-            </form>
+                <?php if (isset($error)): ?>
+                    <div class="error-message"><?php echo $error; ?></div>
+                <?php endif; ?>
+                <form method="POST" action="">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="button-container">
+                        <button type="submit" class="btn-login">Sign In</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </body>
